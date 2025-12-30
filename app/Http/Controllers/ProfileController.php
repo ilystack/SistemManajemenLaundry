@@ -1,0 +1,95 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\View\View;
+
+class ProfileController extends Controller
+{
+    /**
+     * Display the user's profile form.
+     */
+    public function edit(Request $request): RedirectResponse
+    {
+        // Redirect to dashboard with modal trigger
+        $role = $request->user()->role;
+        if ($role === 'admin') {
+            return Redirect::route('admin.dashboard');
+        } elseif ($role === 'karyawan') {
+            return Redirect::route('karyawan.dashboard');
+        } else {
+            return Redirect::route('customer.dashboard');
+        }
+    }
+
+    /**
+     * Update the user's profile information.
+     */
+    public function update(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $request->user()->id],
+            'phone' => ['nullable', 'string', 'max:15'],
+            'address' => ['nullable', 'string', 'max:255'],
+            'latitude' => ['nullable', 'numeric'],
+            'longitude' => ['nullable', 'numeric'],
+            'profile_photo' => ['nullable', 'image', 'mimes:jpeg,jpg,png', 'max:5120'], // 5MB max
+        ]);
+
+        // Handle photo upload
+        if ($request->hasFile('profile_photo')) {
+            // Delete old photo if exists
+            if ($request->user()->profile_photo && \Storage::disk('public')->exists($request->user()->profile_photo)) {
+                \Storage::disk('public')->delete($request->user()->profile_photo);
+            }
+
+            // Store new photo
+            $path = $request->file('profile_photo')->store('profile_photos', 'public');
+            $validated['profile_photo'] = $path;
+        }
+
+        $request->user()->fill($validated);
+
+        if ($request->user()->isDirty('email')) {
+            $request->user()->email_verified_at = null;
+        }
+
+        $request->user()->save();
+
+        // Redirect based on role
+        $role = $request->user()->role;
+        if ($role === 'admin') {
+            return Redirect::route('admin.dashboard')->with('success', 'Profil berhasil diperbarui!');
+        } elseif ($role === 'karyawan') {
+            return Redirect::route('karyawan.dashboard')->with('success', 'Profil berhasil diperbarui!');
+        } else {
+            return Redirect::route('customer.dashboard')->with('success', 'Profil berhasil diperbarui!');
+        }
+    }
+
+    /**
+     * Delete the user's account.
+     */
+    public function destroy(Request $request): RedirectResponse
+    {
+        $request->validateWithBag('userDeletion', [
+            'password' => ['required', 'current_password'],
+        ]);
+
+        $user = $request->user();
+
+        Auth::logout();
+
+        $user->delete();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return Redirect::to('/');
+    }
+}
