@@ -9,7 +9,6 @@
             this.showEditModal = true;
         },
         toggleFilter(jenis) {
-            // Klik badge yang sama = off filter (tampil semua)
             this.filterJenis = this.filterJenis === jenis ? null : jenis;
         },
         shouldShowPaket(paketJenis) {

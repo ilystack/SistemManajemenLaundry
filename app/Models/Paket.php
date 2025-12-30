@@ -23,7 +23,6 @@ class Paket extends Model
         'is_express' => 'boolean',
     ];
 
-    // Helper method untuk label jenis layanan
     public function getJenisLayananLabelAttribute()
     {
         $labels = [
@@ -34,7 +33,6 @@ class Paket extends Model
         return $labels[$this->jenis_layanan] ?? 'Cuci + Setrika';
     }
 
-    // Relationships
     public function orders()
     {
         return $this->hasMany(Order::class);

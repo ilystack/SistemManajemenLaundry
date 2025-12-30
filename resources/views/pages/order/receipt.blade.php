@@ -305,8 +305,6 @@
     </div>
 
     <script>
-        // Auto print dialog on load (optional)
-        // window.onload = function() { window.print(); }
     </script>
 </body>
 

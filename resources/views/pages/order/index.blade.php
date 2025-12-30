@@ -31,15 +31,12 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Update local data
                         this.selectedOrder.status = newStatus;
 
-                        // Show toast
                         if (typeof window.showToast === 'function') {
                             window.showToast(data.message || 'Status berhasil diupdate!', 'success');
                         }
 
-                        // Reload page after 1 second
                         setTimeout(() => {
                             window.location.reload();
                         }, 1000);

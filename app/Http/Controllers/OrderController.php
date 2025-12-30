@@ -17,7 +17,6 @@ class OrderController extends Controller
 
         $pakets = Paket::all();
 
-        // Get laundry location from admin user
         $admin = \App\Models\User::where('role', 'admin')->first();
         $laundryLocation = [
             'latitude' => $admin->latitude ?? null,

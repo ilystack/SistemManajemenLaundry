@@ -47,7 +47,6 @@ class JamKerjaController extends Controller
 
     public function toggleActive(JamKerja $jamKerja)
     {
-        // Toggle active status
         $jamKerja->update(['is_active' => !$jamKerja->is_active]);
 
         return redirect()->route('jam-kerja.index')

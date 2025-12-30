@@ -104,7 +104,6 @@
             longitude: null,
 
             init() {
-                // Cek apakah perlu absensi
                 this.checkAbsensi();
             },
 
@@ -113,7 +112,6 @@
                     const response = await fetch('/absensi/check');
                     const data = await response.json();
 
-                    // Jika dalam jam kerja dan belum absen, tampilkan modal
                     if (data.dalam_jam_kerja && !data.sudah_absen) {
                         this.showModal = true;
                         this.startWebcam();
@@ -207,7 +205,6 @@
                             window.location.reload();
                         }, 1500);
                     } else {
-                        // Show specific error message
                         const errorMsg = data.error || data.message || 'Gagal mengirim absensi';
                         alert(errorMsg);
                         console.error('Server error:', data);

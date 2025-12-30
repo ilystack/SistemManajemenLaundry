@@ -25,13 +25,11 @@ class Absensi extends Model
         'tanggal' => 'date',
     ];
 
-    // Relasi ke user
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    // Relasi ke jam kerja
     public function jamKerja()
     {
         return $this->belongsTo(JamKerja::class);

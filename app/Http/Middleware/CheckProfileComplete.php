@@ -17,9 +17,7 @@ class CheckProfileComplete
     {
         $user = auth()->user();
 
-        // Only check for karyawan role
         if ($user && $user->isKaryawan() && !$user->is_profile_complete) {
-            // Set a flag in session to show the modal
             session(['show_profile_completion_modal' => true]);
         }
 

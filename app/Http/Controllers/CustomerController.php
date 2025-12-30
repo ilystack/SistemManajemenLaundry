@@ -42,7 +42,6 @@ class CustomerController extends Controller
             'is_active' => true,
         ]);
 
-        // Log activity
         \App\Models\ActivityLog::log(
             'customer',
             "Customer baru: {$user->name}",

@@ -19,6 +19,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        if (config('app.env') === 'production') {
+            \URL::forceScheme('https');
+
+            $this->app->useStoragePath('/tmp/storage');
+
+            if (!is_dir('/tmp/storage/framework/views')) {
+                mkdir('/tmp/storage/framework/views', 0755, true);
+            }
+        }
     }
 }

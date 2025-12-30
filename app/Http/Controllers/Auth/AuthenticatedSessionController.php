@@ -53,7 +53,6 @@ class AuthenticatedSessionController extends Controller
 
         $user = Auth::user();
 
-        // Redirect based on user role
         return $this->redirectBasedOnRole($user);
     }
 
@@ -67,12 +66,10 @@ class AuthenticatedSessionController extends Controller
 
         $user = Auth::user();
 
-        // Only allow admin role to login through admin page
         if ($user->role !== 'admin') {
             return $this->logoutWithError($request, 'Halaman ini hanya untuk akun admin.');
         }
 
-        // Log activity
         \App\Models\ActivityLog::log(
             'login',
             "{$user->name} login sebagai Admin",
@@ -99,12 +96,10 @@ class AuthenticatedSessionController extends Controller
 
         $user = Auth::user();
 
-        // Only allow karyawan role to login through karyawan page
         if ($user->role !== 'karyawan') {
             return $this->logoutWithError($request, 'Halaman ini hanya untuk akun karyawan.');
         }
 
-        // Log activity
         \App\Models\ActivityLog::log(
             'login',
             "{$user->name} login sebagai Karyawan",
@@ -127,12 +122,10 @@ class AuthenticatedSessionController extends Controller
 
         $user = Auth::user();
 
-        // Only allow customer role to login through customer page
         if ($user->role !== 'customer') {
             return $this->logoutWithError($request, 'Halaman ini hanya untuk akun customer.');
         }
 
-        // Log activity
         \App\Models\ActivityLog::log(
             'login',
             "{$user->name} login sebagai Customer",

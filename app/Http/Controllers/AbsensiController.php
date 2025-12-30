@@ -11,7 +11,6 @@ use Carbon\Carbon;
 
 class AbsensiController extends Controller
 {
-    // Cek apakah karyawan sudah absen hari ini
     public function checkAbsensi()
     {
         $user = Auth::user();
@@ -21,7 +20,6 @@ class AbsensiController extends Controller
             ->whereDate('tanggal', $today)
             ->first();
 
-        // Map English day to Indonesian
         $hariMap = [
             'Sunday' => 'Minggu',
             'Monday' => 'Senin',
@@ -45,7 +43,6 @@ class AbsensiController extends Controller
         ]);
     }
 
-    // Cek apakah sekarang dalam jam kerja
     private function isDalamJamKerja($jamKerja)
     {
         if (!$jamKerja)
@@ -55,7 +52,6 @@ class AbsensiController extends Controller
         return $now >= $jamKerja->jam_masuk && $now <= $jamKerja->jam_keluar;
     }
 
-    // Store absensi
     public function store(Request $request)
     {
         $request->validate([
@@ -67,7 +63,6 @@ class AbsensiController extends Controller
         $user = Auth::user();
         $today = Carbon::today();
 
-        // Cek apakah sudah absen hari ini
         $existingAbsensi = Absensi::where('user_id', $user->id)
             ->whereDate('tanggal', $today)
             ->first();
@@ -76,7 +71,6 @@ class AbsensiController extends Controller
             return response()->json(['error' => 'Anda sudah absen hari ini'], 400);
         }
 
-        // Map English day to Indonesian
         $hariMap = [
             'Sunday' => 'Minggu',
             'Monday' => 'Senin',
@@ -89,7 +83,6 @@ class AbsensiController extends Controller
 
         $todayName = $hariMap[$today->format('l')];
 
-        // Ambil jam kerja aktif hari ini
         $jamKerja = JamKerja::where('is_active', true)
             ->where('hari', $todayName)
             ->first();
@@ -97,7 +90,6 @@ class AbsensiController extends Controller
             return response()->json(['error' => 'Jam kerja belum diatur'], 400);
         }
 
-        // Simpan foto selfie
         $fotoBase64 = $request->foto_selfie;
         $fotoBase64 = str_replace('data:image/png;base64,', '', $fotoBase64);
         $fotoBase64 = str_replace(' ', '+', $fotoBase64);
@@ -106,14 +98,12 @@ class AbsensiController extends Controller
         $fileName = 'absensi/' . $user->id . '_' . time() . '.png';
         Storage::disk('public')->put($fileName, $fotoData);
 
-        // Tentukan status (tepat waktu atau terlambat)
         $jamAbsen = Carbon::now();
         $jamMasukWithToleransi = Carbon::parse($jamKerja->jam_masuk)
             ->addMinutes($jamKerja->toleransi_menit);
 
         $status = $jamAbsen->lte($jamMasukWithToleransi) ? 'tepat_waktu' : 'terlambat';
 
-        // Simpan absensi
         $absensi = Absensi::create([
             'user_id' => $user->id,
             'jam_kerja_id' => $jamKerja->id,
@@ -125,7 +115,6 @@ class AbsensiController extends Controller
             'status' => $status,
         ]);
 
-        // Log activity
         \App\Models\ActivityLog::log(
             'absensi',
             "Absensi {$status} - {$user->name}",
@@ -147,24 +136,20 @@ class AbsensiController extends Controller
     {
         $query = Absensi::with(['user', 'jamKerja'])->latest('tanggal');
 
-        // Filter by date
         if ($request->filled('tanggal')) {
             $query->whereDate('tanggal', $request->tanggal);
         }
 
-        // Filter by user
         if ($request->filled('user_id')) {
             $query->where('user_id', $request->user_id);
         }
 
-        // Filter by status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
         $absensis = $query->paginate(20);
 
-        // Get all karyawan for filter
         $karyawans = \App\Models\User::where('role', 'karyawan')->get();
 
         return view('pages.absensi.index', compact('absensis', 'karyawans'));

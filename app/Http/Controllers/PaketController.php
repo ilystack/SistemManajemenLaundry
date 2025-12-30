@@ -30,7 +30,6 @@ class PaketController extends Controller
             'keterangan' => 'nullable|string',
         ]);
 
-        // Jika paket KG, langsung create 1 paket
         if ($validated['satuan'] === 'kg') {
             $validated['jenis_layanan'] = 'cuci_setrika'; // default untuk KG
             Paket::create($validated);
@@ -41,7 +40,6 @@ class PaketController extends Controller
             ]);
         }
 
-        // Jika paket PCS, create 3 jenis dengan harga & estimasi berbeda
         $hargaDasar = $validated['harga'];
         $jenisLayanan = [
             [
@@ -96,7 +94,6 @@ class PaketController extends Controller
             'keterangan' => 'nullable|string',
         ]);
 
-        // Handle checkbox (if not checked, it won't be in request)
         $validated['is_express'] = $request->has('is_express') ? 1 : 0;
 
         $paket->update($validated);

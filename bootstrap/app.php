@@ -16,7 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'check.profile' => \App\Http\Middleware\CheckProfileComplete::class,
         ]);
 
-        // Add to web middleware group
+
         $middleware->web(append: [
             \App\Http\Middleware\CheckProfileComplete::class,
         ]);

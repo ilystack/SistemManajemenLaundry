@@ -55,7 +55,6 @@ class User extends Authenticatable
         return $this->role === 'customer';
     }
 
-    // Relationships
     public function orders()
     {
         return $this->hasMany(Order::class);

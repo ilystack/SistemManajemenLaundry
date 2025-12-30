@@ -155,7 +155,6 @@
             let faceDetected = false;
             let modelsLoaded = false;
 
-            // Prevent closing modal with ESC key
             document.addEventListener('keydown', function (e) {
                 if (e.key === 'Escape') {
                     e.preventDefault();
@@ -163,7 +162,6 @@
                 }
             });
 
-            // Load face-api models
             async function loadModels() {
                 try {
                     const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
@@ -179,22 +177,18 @@
                 }
             }
 
-            // Load models on page load
             await loadModels();
 
-            // Handle photo selection
             photoInput.addEventListener('change', async function (e) {
                 const file = e.target.files[0];
                 if (!file) return;
 
-                // Validate file size (5MB)
                 if (file.size > 5 * 1024 * 1024) {
                     showToast('Ukuran file maksimal 5MB', 'error');
                     photoInput.value = '';
                     return;
                 }
 
-                // Validate file type
                 if (!['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) {
                     showToast('Format file harus JPG, JPEG, atau PNG', 'error');
                     photoInput.value = '';
@@ -203,13 +197,11 @@
 
                 fileName.textContent = file.name;
 
-                // Show preview
                 const reader = new FileReader();
                 reader.onload = async function (event) {
                     photoPreview.src = event.target.result;
                     previewContainer.classList.remove('hidden');
 
-                    // Wait for image to load
                     photoPreview.onload = async function () {
                         if (modelsLoaded) {
                             await detectFace();
@@ -223,7 +215,6 @@
                 reader.readAsDataURL(file);
             });
 
-            // Detect face in uploaded photo
             async function detectFace() {
                 try {
                     showDetectionStatus('loading', 'Mendeteksi wajah...');
@@ -233,7 +224,6 @@
                         new faceapi.TinyFaceDetectorOptions()
                     ).withFaceLandmarks();
 
-                    // Clear previous canvas
                     const ctx = faceCanvas.getContext('2d');
                     ctx.clearRect(0, 0, faceCanvas.width, faceCanvas.height);
 
@@ -250,12 +240,10 @@
                         submitBtn.disabled = false;
                         showDetectionStatus('success', '✅ Wajah terdeteksi! Foto dapat digunakan.');
 
-                        // Draw detection box
                         const displaySize = { width: photoPreview.width, height: photoPreview.height };
                         faceapi.matchDimensions(faceCanvas, displaySize);
                         const resizedDetections = faceapi.resizeResults(detections, displaySize);
 
-                        // Draw box around face
                         resizedDetections.forEach(detection => {
                             const box = detection.detection.box;
                             ctx.strokeStyle = '#10b981'; // green
@@ -271,7 +259,6 @@
                 }
             }
 
-            // Show detection status
             function showDetectionStatus(type, message) {
                 const colors = {
                     loading: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-300',
@@ -283,7 +270,6 @@
                 detectionStatus.textContent = message;
             }
 
-            // Handle form submission
             form.addEventListener('submit', async function (e) {
                 e.preventDefault();
 
@@ -292,12 +278,10 @@
                     return;
                 }
 
-                // Disable submit button
                 submitBtn.disabled = true;
                 document.getElementById('submitText').classList.add('hidden');
                 document.getElementById('submitLoading').classList.remove('hidden');
 
-                // Create FormData
                 const formData = new FormData(form);
 
                 try {
@@ -309,7 +293,6 @@
                         body: formData
                     });
 
-                    // Check if response is JSON
                     const contentType = response.headers.get('content-type');
                     if (!contentType || !contentType.includes('application/json')) {
                         const text = await response.text();
@@ -322,12 +305,10 @@
                     if (response.ok && data.success) {
                         showToast(data.message || 'Profil berhasil dilengkapi!', 'success');
 
-                        // Reload page after 1 second
                         setTimeout(() => {
                             window.location.reload();
                         }, 1000);
                     } else {
-                        // Handle validation errors
                         if (data.errors) {
                             const errorMessages = Object.values(data.errors).flat().join(', ');
                             throw new Error(errorMessages);
@@ -347,7 +328,6 @@
 
             // Toast notification function
             function showToast(message, type = 'info') {
-                // Check if toast component exists
                 if (typeof window.showToast === 'function') {
                     window.showToast(message, type);
                 } else {

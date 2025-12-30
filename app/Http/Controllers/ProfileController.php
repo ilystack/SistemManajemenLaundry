@@ -15,7 +15,6 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): RedirectResponse
     {
-        // Redirect to dashboard with modal trigger
         $role = $request->user()->role;
         if ($role === 'admin') {
             return Redirect::route('admin.dashboard');
@@ -41,14 +40,11 @@ class ProfileController extends Controller
             'profile_photo' => ['nullable', 'image', 'mimes:jpeg,jpg,png', 'max:5120'], // 5MB max
         ]);
 
-        // Handle photo upload
         if ($request->hasFile('profile_photo')) {
-            // Delete old photo if exists
             if ($request->user()->profile_photo && \Storage::disk('public')->exists($request->user()->profile_photo)) {
                 \Storage::disk('public')->delete($request->user()->profile_photo);
             }
 
-            // Store new photo
             $path = $request->file('profile_photo')->store('profile_photos', 'public');
             $validated['profile_photo'] = $path;
         }
@@ -61,7 +57,6 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
-        // Redirect based on role
         $role = $request->user()->role;
         if ($role === 'admin') {
             return Redirect::route('admin.dashboard')->with('success', 'Profil berhasil diperbarui!');

@@ -7,14 +7,12 @@
           paketKg: {{ json_encode($pakets->where('satuan', 'kg')->values()->map(function ($p) {
     return ['id' => $p->id, 'nama' => $p->nama, 'harga' => $p->harga];
 })) }},
-          // Group paket PCS berdasarkan nama (karena ada 3 jenis per paket)
           paketPcsRaw: {{ json_encode($pakets->where('satuan', 'pcs')->values()->map(function ($p) {
     return ['id' => $p->id, 'nama' => $p->nama, 'harga' => $p->harga, 'jenis_layanan' => $p->jenis_layanan];
 })) }},
           paketPcsGrouped: {},
           selectedPcsItems: {}, // { 'Cuci Jas': { jenis: 'cuci_setrika', paket_id: 5, jumlah: 2, harga: 15000 } }
           
-          // GPS & Distance
           laundryLat: {{ $laundryLocation['latitude'] ?? 'null' }},
           laundryLng: {{ $laundryLocation['longitude'] ?? 'null' }},
           customerLat: null,
@@ -25,7 +23,6 @@
           locationDetected: false,
           
           init() {
-              // Group paket PCS berdasarkan nama
               this.paketPcsRaw.forEach(p => {
                   if (!this.paketPcsGrouped[p.nama]) {
                       this.paketPcsGrouped[p.nama] = [];
@@ -34,10 +31,8 @@
               });
           },
           
-          // Tambah item PCS
           addPcsItem(namaPaket) {
               if (!this.selectedPcsItems[namaPaket]) {
-                  // Default pilih jenis cuci_setrika
                   const defaultJenis = this.paketPcsGrouped[namaPaket].find(p => p.jenis_layanan === 'cuci_setrika');
                   this.selectedPcsItems[namaPaket] = {
                       jenis: defaultJenis ? defaultJenis.jenis_layanan : this.paketPcsGrouped[namaPaket][0].jenis_layanan,
@@ -48,7 +43,6 @@
               }
           },
           
-          // Update jenis layanan
           updateJenis(namaPaket, jenis) {
               const paket = this.paketPcsGrouped[namaPaket].find(p => p.jenis_layanan === jenis);
               if (paket && this.selectedPcsItems[namaPaket]) {
@@ -58,36 +52,30 @@
               }
           },
           
-          // Increment jumlah
           incrementPcs(namaPaket) {
               if (this.selectedPcsItems[namaPaket]) {
                   this.selectedPcsItems[namaPaket].jumlah++;
               }
           },
           
-          // Decrement jumlah
           decrementPcs(namaPaket) {
               if (this.selectedPcsItems[namaPaket] && this.selectedPcsItems[namaPaket].jumlah > 1) {
                   this.selectedPcsItems[namaPaket].jumlah--;
               }
           },
           
-          // Hapus item
           removePcsItem(namaPaket) {
               delete this.selectedPcsItems[namaPaket];
           },
           
-          // Get total items PCS
           getTotalPcsItems() {
               return Object.values(this.selectedPcsItems).reduce((sum, item) => sum + item.jumlah, 0);
           },
           
-          // Get total price PCS
           getTotalPcsPrice() {
               return Object.values(this.selectedPcsItems).reduce((sum, item) => sum + (item.jumlah * item.harga), 0);
           },
           
-          // Get label jenis layanan
           getJenisLabel(jenis) {
               const labels = {
                   'cuci_saja': '🧼 Cuci Saja',
@@ -97,7 +85,6 @@
               return labels[jenis] || jenis;
           },
           
-          // Haversine Formula untuk hitung jarak
           calculateDistance(lat1, lon1, lat2, lon2) {
               const R = 6371; // Radius bumi dalam km
               const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -109,7 +96,6 @@
               return R * c; // Jarak dalam km
           },
           
-          // Ambil lokasi customer & hitung jarak
           detectLocation() {
               if (!this.laundryLat || !this.laundryLng) {
                   alert('Lokasi laundry belum diset oleh admin. Silakan hubungi admin.');
@@ -123,7 +109,6 @@
                           this.customerLat = position.coords.latitude;
                           this.customerLng = position.coords.longitude;
                           
-                          // Hitung jarak
                           this.distance = this.calculateDistance(
                               this.laundryLat, 
                               this.laundryLng,
@@ -131,13 +116,10 @@
                               this.customerLng
                           );
                           
-                          // Bulatkan 1 desimal
                           this.distance = Math.round(this.distance * 10) / 10;
                           
-                          // Hitung biaya pickup (Rp 1.000/km)
                           this.pickupCost = Math.round(this.distance * 1000);
                           
-                          // Set ke form
                           document.getElementById('jarak_km').value = this.distance;
                           document.getElementById('latitude').value = this.customerLat;
                           document.getElementById('longitude').value = this.customerLng;

@@ -17,23 +17,18 @@ class PaymentController extends Controller
         $this->midtransService = $midtransService;
     }
 
-    // Buat payment untuk DP jemput
     public function createPayment(Order $order)
     {
-        // Cek apakah order ini butuh DP (dijemput)
         if ($order->pickup !== 'dijemput') {
             return redirect()->back()->with('error', 'Order ini tidak memerlukan pembayaran DP');
         }
 
-        // Cek apakah sudah ada payment
         if ($order->payment && $order->payment->status === 'success') {
             return redirect()->back()->with('error', 'Order ini sudah dibayar');
         }
 
-        // Generate order code unik
         $orderCode = 'DP-' . $order->id . '-' . time();
 
-        // Customer details
         $customerDetails = [
             'first_name' => $order->user->name,
             'email' => $order->user->email,
@@ -41,14 +36,12 @@ class PaymentController extends Controller
         ];
 
         try {
-            // Create transaction via Midtrans
             $snapToken = $this->midtransService->createTransaction(
                 $orderCode,
                 $order->biaya_pickup, // DP = biaya pickup
                 $customerDetails
             );
 
-            // Save payment record
             $payment = Payment::updateOrCreate(
                 ['order_id' => $order->id],
                 [
@@ -61,7 +54,6 @@ class PaymentController extends Controller
                 ]
             );
 
-            // Redirect ke halaman payment
             return view('pages.payment.show', compact('payment', 'order'));
 
         } catch (\Exception $e) {
@@ -69,10 +61,8 @@ class PaymentController extends Controller
         }
     }
 
-    // Webhook dari Midtrans
     public function webhook(Request $request)
     {
-        // Verifikasi signature
         $serverKey = config('services.midtrans.server_key');
         $hashed = hash('sha512', $request->order_id . $request->status_code . $request->gross_amount . $serverKey);
 
@@ -80,14 +70,12 @@ class PaymentController extends Controller
             return response()->json(['message' => 'Invalid signature'], 403);
         }
 
-        // Find payment
         $payment = Payment::where('order_code', $request->order_id)->first();
 
         if (!$payment) {
             return response()->json(['message' => 'Payment not found'], 404);
         }
 
-        // Update payment status
         $transactionStatus = $request->transaction_status;
         $fraudStatus = $request->fraud_status ?? 'accept';
 
@@ -117,7 +105,6 @@ class PaymentController extends Controller
             ]);
         }
 
-        // Log activity jika sukses
         if ($payment->status === 'success') {
             \App\Models\ActivityLog::log(
                 'payment',
@@ -132,7 +119,6 @@ class PaymentController extends Controller
         return response()->json(['message' => 'OK']);
     }
 
-    // Cek status payment
     public function checkStatus(Payment $payment)
     {
         return response()->json([

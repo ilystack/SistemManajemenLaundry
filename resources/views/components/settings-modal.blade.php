@@ -35,7 +35,6 @@
 
             <form action="{{ route('settings.update') }}" method="POST" enctype="multipart/form-data" class="p-6"
                 x-data="{ 
-                      // Location Logic
                       gettingLocation: false,
                       useCurrentLocation: false,
                       getLocation() {
@@ -58,7 +57,6 @@
                           }
                       },
 
-                      // Logo Preview Logic
                       photoPreview: null,
                       updatePreview() {
                           const file = this.$refs.photo.files[0];

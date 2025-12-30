@@ -9,7 +9,6 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        // Configure Tailwind AFTER it loads
         tailwind.config = {
             darkMode: 'class'
         }
@@ -17,7 +16,6 @@
     
     <!-- Initialize dark mode BEFORE Alpine loads -->
     <script>
-        // Check localStorage and apply dark mode immediately
         if (localStorage.getItem('darkMode') === 'true') {
             document.documentElement.classList.add('dark');
         }
@@ -141,7 +139,6 @@
 
                 if (data.success) {
                     this.showRatingModal = false;
-                    // Reload page to update button state
                     window.location.reload();
                 } else {
                     this.ratingError = data.message || 'Gagal mengirim penilaian!';

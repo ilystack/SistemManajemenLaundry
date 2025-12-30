@@ -41,7 +41,6 @@ class KaryawanController extends Controller
             'is_active' => true,
         ]);
 
-        // Log activity
         \App\Models\ActivityLog::log(
             'karyawan',
             "Karyawan baru: {$user->name}",

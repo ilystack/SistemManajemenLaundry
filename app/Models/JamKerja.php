@@ -23,7 +23,6 @@ class JamKerja extends Model
         'is_active' => 'boolean',
     ];
 
-    // Relasi ke absensi
     public function absensis()
     {
         return $this->hasMany(Absensi::class);

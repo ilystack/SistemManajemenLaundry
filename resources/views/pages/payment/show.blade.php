@@ -140,7 +140,6 @@
                 status: '{{ $payment->status }}',
 
                 init() {
-                    // Auto check status setiap 3 detik
                     setInterval(() => {
                         this.checkStatus();
                     }, 3000);
@@ -154,7 +153,6 @@
                         if (data.status !== this.status) {
                             this.status = data.status;
 
-                            // Reload jika sukses
                             if (data.status === 'success') {
                                 setTimeout(() => {
                                     window.location.reload();

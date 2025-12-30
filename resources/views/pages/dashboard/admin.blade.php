@@ -207,7 +207,6 @@
                 },
                 height: 'auto',
                 events: [
-                    // Sample events - you can load from database later
                     {
                         title: 'Order Selesai',
                         start: '{{ date("Y-m-d") }}',

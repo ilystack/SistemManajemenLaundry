@@ -20,7 +20,6 @@ class TestimonialController extends Controller
             'comment' => 'nullable|string|max:500',
         ]);
 
-        // Cek apakah order milik user yang login
         $order = Order::findOrFail($request->order_id);
         if ($order->user_id !== Auth::id()) {
             return response()->json([
@@ -29,7 +28,6 @@ class TestimonialController extends Controller
             ], 403);
         }
 
-        // Cek apakah order sudah selesai
         if ($order->status !== 'selesai') {
             return response()->json([
                 'success' => false,
@@ -37,7 +35,6 @@ class TestimonialController extends Controller
             ], 400);
         }
 
-        // Cek apakah sudah pernah kasih testimoni untuk order ini
         $existingTestimonial = Testimonial::where('order_id', $request->order_id)->first();
         if ($existingTestimonial) {
             return response()->json([
@@ -46,7 +43,6 @@ class TestimonialController extends Controller
             ], 400);
         }
 
-        // Simpan testimonial
         $testimonial = Testimonial::create([
             'user_id' => Auth::id(),
             'order_id' => $request->order_id,
@@ -55,7 +51,6 @@ class TestimonialController extends Controller
             'is_approved' => true, // Auto approve
         ]);
 
-        // Log activity
         \App\Models\ActivityLog::log(
             'testimonial',
             "Testimoni baru: {$request->rating} ⭐ dari " . Auth::user()->name,
