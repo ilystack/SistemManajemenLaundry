@@ -7,6 +7,7 @@
     <link rel="icon" type="image/png" href="{{ asset('assets/icon.png') }}">
     <title>Almas Laundry - #1 Laundry Cepat, Bersih, dan Wangi</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.8.11/dist/dotlottie-wc.js" type="module"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         * {
@@ -142,6 +143,48 @@
             animation: none;
             transform: scale(1.1);
             transition: transform 0.3s ease;
+        }
+
+        /* Loading Overlay Styles */
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        #loadingOverlay.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        #loadingOverlay dotlottie-wc {
+            width: 200px;
+            height: 200px;
+        }
+
+        /* Responsive Loading Sizes */
+        @media (max-width: 1024px) {
+            #loadingOverlay dotlottie-wc {
+                width: 150px;
+                height: 150px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            #loadingOverlay dotlottie-wc {
+                width: 100px;
+                height: 100px;
+            }
         }
     </style>
 </head>
@@ -894,7 +937,85 @@
         </div>
     </footer>
 
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay">
+        <dotlottie-wc src="https://lottie.host/4d0dfcd1-a0f2-4333-9db3-3a0e8a0383c6/hk6aLPbhTy.lottie" autoplay loop>
+        </dotlottie-wc>
+    </div>
+
     <script>
+        // ==================== LOADING HELPER FUNCTIONS ====================
+
+        /**
+         * Show loading overlay
+         */
+        window.showLoading = function () {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) {
+                overlay.classList.add('show');
+            }
+        };
+
+        /**
+         * Hide loading overlay
+         */
+        window.hideLoading = function () {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) {
+                overlay.classList.remove('show');
+            }
+        };
+
+        /**
+         * Redirect with loading animation
+         * @param {string} url - URL to redirect to
+         */
+        window.loadingRedirect = function (url) {
+            showLoading();
+            setTimeout(() => {
+                window.location.href = url;
+            }, 100);
+        };
+
+        // Auto-detect and add loading to all forms
+        document.addEventListener('DOMContentLoaded', function () {
+            // Handle all form submissions
+            document.querySelectorAll('form').forEach(form => {
+                form.addEventListener('submit', function (e) {
+                    // Only show loading if form is valid
+                    if (this.checkValidity()) {
+                        showLoading();
+                    }
+                });
+            });
+
+            // Handle links with data-loading attribute
+            document.querySelectorAll('a[data-loading], button[data-loading]').forEach(element => {
+                element.addEventListener('click', function (e) {
+                    const href = this.getAttribute('href');
+                    const onclick = this.getAttribute('onclick');
+
+                    // If it's a link with href (not # or javascript:)
+                    if (href && !href.startsWith('#') && !href.startsWith('javascript:')) {
+                        e.preventDefault();
+                        loadingRedirect(href);
+                    }
+                    // If it has onclick that includes location.href
+                    else if (onclick && onclick.includes('location.href')) {
+                        showLoading();
+                    }
+                });
+            });
+
+            // Update all "Pesan Sekarang" buttons to use loading
+            document.querySelectorAll('button[onclick*="location.href"]').forEach(button => {
+                const originalOnclick = button.getAttribute('onclick');
+                button.setAttribute('onclick', `showLoading(); ${originalOnclick}`);
+            });
+        });
+
+        // ==================== EXISTING SCRIPTS ====================
+
         const observerOptions = {
             threshold: 0.25,
             rootMargin: '0px 0px -100px 0px'
