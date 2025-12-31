@@ -41,11 +41,19 @@ class ProfileController extends Controller
         ]);
 
         if ($request->hasFile('profile_photo')) {
-            if ($request->user()->profile_photo && \Storage::disk('public')->exists($request->user()->profile_photo)) {
-                \Storage::disk('public')->delete($request->user()->profile_photo);
+            if ($request->user()->profile_photo) {
+                try {
+                    if (str_contains($request->user()->profile_photo, 'cloudinary')) {
+                        $publicId = basename(parse_url($request->user()->profile_photo, PHP_URL_PATH), '.' . pathinfo($request->user()->profile_photo, PATHINFO_EXTENSION));
+                        \Storage::disk('cloudinary')->delete('profile_photos/' . $publicId);
+                    }
+                } catch (\Exception $e) {
+                    \Log::warning('Failed to delete old profile photo: ' . $e->getMessage());
+                }
             }
 
-            $path = $request->file('profile_photo')->store('profile_photos', 'public');
+            $uploadedFile = $request->file('profile_photo');
+            $path = \Storage::disk('cloudinary')->putFile('profile_photos', $uploadedFile);
             $validated['profile_photo'] = $path;
         }
 

@@ -38,11 +38,19 @@ class SettingsController extends Controller
         $user->longitude = $request->longitude;
 
         if ($request->hasFile('laundry_logo')) {
-            if ($user->laundry_logo && Storage::exists('public/' . $user->laundry_logo)) {
-                Storage::delete('public/' . $user->laundry_logo);
+            if ($user->laundry_logo) {
+                try {
+                    if (str_contains($user->laundry_logo, 'cloudinary')) {
+                        $publicId = basename(parse_url($user->laundry_logo, PHP_URL_PATH), '.' . pathinfo($user->laundry_logo, PATHINFO_EXTENSION));
+                        Storage::disk('cloudinary')->delete('logos/' . $publicId);
+                    }
+                } catch (\Exception $e) {
+                    \Log::warning('Failed to delete old laundry logo: ' . $e->getMessage());
+                }
             }
 
-            $path = $request->file('laundry_logo')->store('logos', 'public');
+            $uploadedFile = $request->file('laundry_logo');
+            $path = Storage::disk('cloudinary')->putFile('logos', $uploadedFile);
             $user->laundry_logo = $path;
         }
 

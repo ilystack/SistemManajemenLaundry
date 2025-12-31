@@ -75,7 +75,7 @@
 
                         @if(Auth::user()->profile_photo)
                             <div class="mb-3">
-                                <img src="{{ asset('storage/' . Auth::user()->profile_photo) }}" alt="Current Profile Photo"
+                                <img src="{{ Storage::url(Auth::user()->profile_photo) }}" alt="Current Profile Photo"
                                     class="w-24 h-24 rounded-lg object-cover border-2 border-gray-300 dark:border-gray-600">
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Foto saat ini</p>
                             </div>

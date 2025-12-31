@@ -166,7 +166,7 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <button
-                                        @click="showFoto('{{ asset('storage/' . $absensi->foto_selfie) }}', '{{ $absensi->user->name }}')"
+                                        @click="showFoto('{{ Storage::url($absensi->foto_selfie) }}', '{{ $absensi->user->name }}')"
                                         class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium text-sm">
                                         Lihat Foto
                                     </button>

@@ -7,6 +7,7 @@
     <link rel="icon" type="image/png" href="{{ asset('assets/icon.png') }}">
     <title>Login {{ ucfirst($role ?? 'Admin') }} - Almas Laundry</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.8.11/dist/dotlottie-wc.js" type="module"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link
         href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap"
@@ -76,6 +77,39 @@
         [x-cloak] {
             display: none !important;
         }
+
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        #loadingOverlay.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        #loadingOverlay dotlottie-wc {
+            width: 200px;
+            height: 200px;
+        }
+
+        @media (max-width: 640px) {
+            #loadingOverlay dotlottie-wc {
+                width: 100px;
+                height: 100px;
+            }
+        }
     </style>
 </head>
 
@@ -103,7 +137,7 @@
                                         }
                                     }));
                                 @endforeach
-                                    });
+                                                });
                         </script>
                     @endif
 
@@ -184,7 +218,31 @@
         </div>
     </div>
 
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay">
+        <dotlottie-wc src="https://lottie.host/4d0dfcd1-a0f2-4333-9db3-3a0e8a0383c6/hk6aLPbhTy.lottie" autoplay loop>
+        </dotlottie-wc>
+    </div>
+
     <script>
+        function showLoading() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) {
+                overlay.classList.add('show');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const loginForm = document.querySelector('form');
+            if (loginForm) {
+                loginForm.addEventListener('submit', function (e) {
+                    if (this.checkValidity()) {
+                        showLoading();
+                    }
+                });
+            }
+        });
+
         function togglePassword() {
             const passwordInput = document.getElementById('password');
             const eyeIcon = document.getElementById('eye-icon');

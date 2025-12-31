@@ -81,7 +81,6 @@
             height: 200px;
         }
 
-        /* Responsive Loading Sizes */
         @media (max-width: 1024px) {
             #loadingOverlay dotlottie-wc {
                 width: 150px;
@@ -384,7 +383,7 @@
                                 x-on:click="userDropdownIsOpen = !userDropdownIsOpen"
                                 x-bind:aria-expanded="userDropdownIsOpen">
                                 @if(Auth::user()->profile_photo)
-                                    <img src="{{ asset('storage/' . Auth::user()->profile_photo) }}"
+                                    <img src="{{ Storage::url(Auth::user()->profile_photo) }}"
                                         class="w-10 h-10 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600"
                                         alt="Profile Photo">
                                 @else
@@ -498,8 +497,6 @@
     </div>
 
     <script>
-        // ==================== LOADING HELPER FUNCTIONS ====================
-
         /**
          * Show loading overlay
          */
@@ -531,53 +528,50 @@
             }, 100);
         };
 
-        // Auto-detect and add loading to all forms and links
         document.addEventListener('DOMContentLoaded', function () {
-            // Handle all form submissions
             document.querySelectorAll('form').forEach(form => {
                 form.addEventListener('submit', function (e) {
-                    // Only show loading if form is valid and not a search form
                     if (this.checkValidity() && !this.querySelector('input[type="search"]')) {
                         showLoading();
                     }
                 });
             });
 
-            // Handle links with data-loading attribute
             document.querySelectorAll('a[data-loading], button[data-loading]').forEach(element => {
                 element.addEventListener('click', function (e) {
                     const href = this.getAttribute('href');
                     const onclick = this.getAttribute('onclick');
 
-                    // If it's a link with href (not # or javascript:)
                     if (href && !href.startsWith('#') && !href.startsWith('javascript:')) {
                         e.preventDefault();
                         loadingRedirect(href);
                     }
-                    // If it has onclick that includes location.href
                     else if (onclick && onclick.includes('location.href')) {
                         showLoading();
                     }
                 });
             });
 
-            // Auto-add loading to all sidebar navigation links
             document.querySelectorAll('nav a[href]:not([href^="#"]):not([href^="javascript:"])').forEach(link => {
                 link.addEventListener('click', function (e) {
-                    // Don't show loading for dropdown toggles or search results
                     if (!this.closest('[x-data]') && !this.classList.contains('no-loading')) {
                         showLoading();
                     }
                 });
             });
 
-            // Update all buttons with onclick location.href to use loading
             document.querySelectorAll('button[onclick*="location.href"]').forEach(button => {
                 const originalOnclick = button.getAttribute('onclick');
                 if (!originalOnclick.includes('showLoading')) {
                     button.setAttribute('onclick', `showLoading(); ${originalOnclick}`);
                 }
             });
+        });
+
+        window.addEventListener('pageshow', function (event) {
+            if (event.persisted) {
+                hideLoading();
+            }
         });
     </script>
 </body>
