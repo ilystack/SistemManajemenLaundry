@@ -1,15 +1,11 @@
-<!-- Modal Absensi (Blocking) -->
 <div x-data="absensiModal()" x-show="showModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto"
     style="display: none;">
 
-    <!-- Backdrop (tidak bisa di-close) -->
     <div class="fixed inset-0 bg-black bg-opacity-75 backdrop-blur-sm"></div>
 
-    <!-- Modal Content -->
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6">
 
-            <!-- Header -->
             <div class="text-center mb-6">
                 <div
                     class="mx-auto w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mb-4">
@@ -27,7 +23,6 @@
                 </p>
             </div>
 
-            <!-- Webcam Preview -->
             <div class="mb-6">
                 <div class="relative bg-gray-900 rounded-lg overflow-hidden aspect-video">
                     <video x-ref="video" autoplay playsinline class="w-full h-full object-cover"
@@ -37,7 +32,6 @@
                 </div>
             </div>
 
-            <!-- Buttons -->
             <div class="space-y-3">
                 <button @click="ambilFoto()" x-show="!fotoTaken"
                     class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2">
@@ -78,7 +72,6 @@
                 </div>
             </div>
 
-            <!-- Info -->
             <div
                 class="mt-4 text-center text-sm text-gray-500 dark:text-gray-400 flex items-center justify-center gap-2">
                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">

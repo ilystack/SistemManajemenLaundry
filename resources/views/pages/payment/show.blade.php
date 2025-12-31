@@ -1,12 +1,10 @@
 <x-sidetop :role="Auth::user()->role" title="Pembayaran DP">
     <div class="max-w-2xl mx-auto space-y-6">
-        <!-- Header -->
         <div class="text-center">
             <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Pembayaran DP Penjemputan</h2>
             <p class="text-gray-600 dark:text-gray-400">Scan QRIS untuk melanjutkan order Anda</p>
         </div>
 
-        <!-- Order Info Card -->
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -40,11 +38,9 @@
             </div>
         </div>
 
-        <!-- Payment Status -->
         <div x-data="paymentStatus({{ $payment->id }})"
             class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
             <div class="text-center">
-                <!-- Pending State -->
                 <div x-show="status === 'pending'" class="space-y-4">
                     <div
                         class="w-16 h-16 bg-yellow-100 dark:bg-yellow-900/20 rounded-full flex items-center justify-center mx-auto">
@@ -68,7 +64,6 @@
                     </button>
                 </div>
 
-                <!-- Success State -->
                 <div x-show="status === 'success'" class="space-y-4">
                     <div
                         class="w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto">
@@ -88,7 +83,6 @@
                     </a>
                 </div>
 
-                <!-- Failed State -->
                 <div x-show="status === 'failed'" class="space-y-4">
                     <div
                         class="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto">
@@ -109,7 +103,6 @@
             </div>
         </div>
 
-        <!-- Info -->
         <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
             <div class="flex gap-3">
                 <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="currentColor"
@@ -130,7 +123,6 @@
         </div>
     </div>
 
-    <!-- Midtrans Snap Script -->
     <script src="https://app.sandbox.midtrans.com/snap/snap.js"
         data-client-key="{{ config('services.midtrans.client_key') }}"></script>
 

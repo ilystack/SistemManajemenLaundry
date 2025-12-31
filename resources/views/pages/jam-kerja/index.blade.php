@@ -93,7 +93,6 @@
                         </div>
                     </div>
 
-                    <!-- Actions -->
                     <div class="flex gap-2">
                         <form action="{{ route('jam-kerja.toggle', $jamKerja) }}" method="POST" class="flex-1">
                             @csrf

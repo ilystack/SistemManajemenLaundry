@@ -15,7 +15,6 @@
             return this.filterJenis === null || this.filterJenis === paketJenis;
         }
     }" class="space-y-6">
-        <!-- Header -->
         <div class="flex justify-center items-center">
             <button @click="showModal = true"
                 class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all shadow-lg hover:shadow-xl flex items-center gap-2">
@@ -33,7 +32,6 @@
             $paketPcs = $pakets->where('satuan', 'pcs');
         @endphp
 
-        <!-- Paket Kiloan (KG) -->
         <div
             class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div class="px-6 py-4 bg-transparent border-b border-gray-200 dark:border-gray-700">
@@ -134,7 +132,6 @@
             </div>
         </div>
 
-        <!-- Paket Satuan (PCS) -->
         <div
             class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div class="px-6 py-4 bg-transparent border-b border-gray-200 dark:border-gray-700">
@@ -156,7 +153,6 @@
                                 Nama Paket</th>
                             <th
                                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                <!-- Jenis Layanan dengan Dropdown Filter -->
                                 <div class="flex items-center gap-2" x-data="{ showFilterDropdown: false }">
                                     <span>Jenis Layanan</span>
                                     <div class="relative">
@@ -170,7 +166,6 @@
                                             </svg>
                                         </button>
 
-                                        <!-- Dropdown Menu -->
                                         <div x-show="showFilterDropdown" @click.away="showFilterDropdown = false"
                                             x-transition:enter="transition ease-out duration-100"
                                             x-transition:enter-start="transform opacity-0 scale-95"
@@ -324,18 +319,15 @@
             </div>
         </div>
 
-        <!-- Modal Tambah Paket -->
         <div x-show="showModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto"
             aria-labelledby="modal-title" role="dialog" aria-modal="true">
 
-            <!-- Backdrop -->
             <div x-show="showModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
                 x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
                 x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
                 class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/80 backdrop-blur-sm transition-opacity"
                 @click="showModal = false"></div>
 
-            <!-- Panel -->
             <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-start sm:p-0">
                 <div x-show="showModal" x-transition:enter="ease-out duration-300"
                     x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -345,7 +337,6 @@
                     x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                     class="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-xl border border-gray-200 dark:border-gray-700">
 
-                    <!-- Modal Header -->
                     <div
                         class="px-4 py-4 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700 sm:px-6 flex justify-between items-center">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white" id="modal-title">
@@ -361,12 +352,10 @@
                         </button>
                     </div>
 
-                    <!-- Form -->
                     <form action="{{ route('paket.store') }}" method="POST" class="p-6 space-y-4"
                         x-data="{ selectedSatuan: 'kg' }">
                         @csrf
 
-                        <!-- Step 1: Pilih Satuan DULU -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Pilih Satuan
                                 Paket</label>
@@ -400,7 +389,6 @@
                             </p>
                         </div>
 
-                        <!-- Step 2: Form Fields -->
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nama
@@ -432,14 +420,12 @@
                                     Cuci Saja: -Rp 500 | Kilat: +Rp 2.000
                                 </p>
                             </div>
-                            <!-- Estimasi hanya untuk KG -->
                             <div x-show="selectedSatuan === 'kg'">
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Estimasi
                                     (Hari)</label>
                                 <input type="number" name="estimasi_hari" :required="selectedSatuan === 'kg'" min="1"
                                     class="w-full rounded-lg border-gray-300 bg-gray-50 focus:bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:border-blue-500 focus:ring-blue-500 transition-colors">
                             </div>
-                            <!-- Info estimasi untuk PCS -->
                             <div x-show="selectedSatuan === 'pcs'" class="flex items-center">
                                 <div
                                     class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3 border border-purple-200 dark:border-purple-800 w-full">
@@ -453,7 +439,6 @@
                             </div>
                         </div>
 
-                        <!-- Checkbox Express hanya untuk KG -->
                         <div x-show="selectedSatuan === 'kg'">
                             <div class="flex items-center gap-2 mb-2">
                                 <input type="checkbox" id="is_express" name="is_express" value="1"
@@ -486,18 +471,15 @@
             </div>
         </div>
 
-        <!-- Modal Edit Paket -->
         <div x-show="showEditModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto"
             aria-labelledby="edit-modal-title" role="dialog" aria-modal="true">
 
-            <!-- Backdrop -->
             <div x-show="showEditModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
                 x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
                 x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
                 class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/80 backdrop-blur-sm transition-opacity"
                 @click="showEditModal = false"></div>
 
-            <!-- Panel -->
             <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-start sm:p-0">
                 <div x-show="showEditModal" x-transition:enter="ease-out duration-300"
                     x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -507,7 +489,6 @@
                     x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                     class="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-xl border border-gray-200 dark:border-gray-700">
 
-                    <!-- Modal Header -->
                     <div
                         class="px-4 py-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border-b border-gray-200 dark:border-gray-700 sm:px-6 flex justify-between items-center">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white" id="edit-modal-title">
@@ -523,7 +504,6 @@
                         </button>
                     </div>
 
-                    <!-- Form -->
                     <form :action="`{{ url('paket') }}/${editPaket.id}`" method="POST" class="p-6 space-y-4">
                         @csrf
                         @method('PUT')

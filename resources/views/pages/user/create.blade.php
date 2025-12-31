@@ -1,17 +1,14 @@
 <x-sidetop role="{{ Auth::user()->role }}" title="Tambah User">
     <div class="max-w-2xl mx-auto">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
-            <!-- Header -->
             <div class="mb-6">
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Tambah User Baru</h2>
                 <p class="text-gray-600 dark:text-gray-400 mt-1">Tambahkan karyawan atau customer baru</p>
             </div>
 
-            <!-- Form -->
             <form action="{{ route('user.store') }}" method="POST" class="space-y-6">
                 @csrf
 
-                <!-- Name -->
                 <div>
                     <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Nama Lengkap
@@ -24,7 +21,6 @@
                     @enderror
                 </div>
 
-                <!-- Email -->
                 <div>
                     <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Email
@@ -37,7 +33,6 @@
                     @enderror
                 </div>
 
-                <!-- Role -->
                 <div>
                     <label for="role" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Role
@@ -54,7 +49,6 @@
                     @enderror
                 </div>
 
-                <!-- Password -->
                 <div>
                     <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Password
@@ -67,7 +61,6 @@
                     @enderror
                 </div>
 
-                <!-- Buttons -->
                 <div class="flex gap-3 pt-4">
                     <button type="submit"
                         class="flex-1 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl">

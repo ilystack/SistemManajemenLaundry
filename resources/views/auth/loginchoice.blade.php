@@ -143,7 +143,6 @@
                 </a>
             </div>
 
-            <!-- Register Link -->
             <div class="mt-8 sm:mt-12 text-center animate-fadeInUp delay-300">
                 <p class="text-gray-600 font-medium">
                     Anda Customer?
@@ -155,7 +154,6 @@
             </div>
         </div>
 
-        <!-- Back to Home Link (Outside Card) -->
         <div class="mt-8 text-center animate-fadeInUp delay-300">
             <a href="/"
                 class="inline-flex items-center text-blue-700 hover:text-blue-900 font-semibold transition bg-white/60 px-6 py-3 rounded-full hover:bg-white/90 backdrop-blur-sm shadow-sm hover:shadow-md hover:scale-105 transform duration-200">

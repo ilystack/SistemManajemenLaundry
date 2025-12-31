@@ -1,4 +1,3 @@
-            <!-- Modal Form for Creating Order -->
 <form action="{{ route('order.store') }}" method="POST" class="p-6 space-y-5" x-data="{ 
           pickup: 'antar_sendiri',
           tipeOrder: null,
@@ -139,7 +138,6 @@
       }">
     @csrf
 
-    <!-- Step 1: Pilih Tipe Order -->
     <div>
         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Pilih Tipe Paket</label>
         <div class="grid grid-cols-2 gap-4">
@@ -164,11 +162,10 @@
         </div>
     </div>
 
-    <!-- Step 2A: Form Kiloan -->
     <div x-show="tipeOrder === 'kg'" x-transition class="space-y-4">
         <div>
             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Pilih Paket Kiloan</label>
-            <select name="paket_id_kg" x-model="selectedPaketKg"
+            <select name="paket_id_kg" x-model="selectedPaketKg" :required="tipeOrder === 'kg'"
                 class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 dark:text-white focus:bg-white dark:focus:bg-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 transition-all">
                 <option value="" disabled selected>-- Pilih Paket --</option>
                 <template x-for="paket in paketKg" :key="paket.id">
@@ -182,21 +179,22 @@
             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Berat (Kilogram)</label>
             <div class="relative">
                 <input type="number" name="jumlah_kg" x-model="jumlahKg" min="0.1" step="0.1" placeholder="Contoh: 3.5"
+                    :required="tipeOrder === 'kg'"
                     class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 dark:text-white focus:bg-white dark:focus:bg-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 transition-all pr-12">
                 <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                     <span class="text-gray-500 dark:text-gray-400 font-medium text-sm">kg</span>
                 </div>
             </div>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Masukkan berat cucian dalam kilogram (bisa desimal)</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Masukkan berat cucian dalam kilogram (bisa desimal)
+            </p>
         </div>
     </div>
 
-    <!-- Step 2B: Form Satuan (NEW with Jenis Layanan) -->
     <div x-show="tipeOrder === 'pcs'" x-transition class="space-y-4">
         <div>
-            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Pilih Paket & Jenis Layanan</label>
+            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Pilih Paket & Jenis
+                Layanan</label>
 
-            <!-- List Paket yang Tersedia -->
             <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 space-y-3 max-h-96 overflow-y-auto">
                 <template x-for="(jenisArray, namaPaket) in paketPcsGrouped" :key="namaPaket">
                     <div class="bg-white dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
@@ -205,30 +203,28 @@
                                 <p class="font-bold text-gray-900 dark:text-white" x-text="namaPaket"></p>
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Pilih jenis layanan</p>
                             </div>
-                            <button type="button" @click="addPcsItem(namaPaket)" 
-                                x-show="!selectedPcsItems[namaPaket]"
+                            <button type="button" @click="addPcsItem(namaPaket)" x-show="!selectedPcsItems[namaPaket]"
                                 class="px-3 py-1.5 bg-purple-500 hover:bg-purple-600 text-white text-sm font-semibold rounded-lg transition">
                                 + Tambah
                             </button>
                         </div>
 
-                        <!-- Jika sudah ditambahkan, tampilkan form -->
-                        <div x-show="selectedPcsItems[namaPaket]" x-transition class="space-y-3 pt-3 border-t border-gray-200 dark:border-gray-600">
-                            <!-- Dropdown Jenis Layanan -->
+                        <div x-show="selectedPcsItems[namaPaket]" x-transition
+                            class="space-y-3 pt-3 border-t border-gray-200 dark:border-gray-600">
                             <div>
-                                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Jenis Layanan:</label>
-                                <select @change="updateJenis(namaPaket, $event.target.value)" 
+                                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Jenis
+                                    Layanan:</label>
+                                <select @change="updateJenis(namaPaket, $event.target.value)"
                                     :value="selectedPcsItems[namaPaket]?.jenis"
                                     class="w-full text-sm rounded-lg border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-600 dark:text-white focus:border-purple-500 focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 transition-all">
                                     <template x-for="paket in jenisArray" :key="paket.id">
-                                        <option :value="paket.jenis_layanan" 
+                                        <option :value="paket.jenis_layanan"
                                             x-text="`${getJenisLabel(paket.jenis_layanan)} - Rp ${paket.harga.toLocaleString('id-ID')}`">
                                         </option>
                                     </template>
                                 </select>
                             </div>
 
-                            <!-- Counter Jumlah -->
                             <div class="flex items-center justify-between">
                                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Jumlah:</span>
                                 <div class="flex items-center gap-3">
@@ -236,7 +232,7 @@
                                         class="w-8 h-8 rounded-lg bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-700 dark:text-white font-bold transition flex items-center justify-center">
                                         −
                                     </button>
-                                    <span class="w-8 text-center font-bold text-gray-900 dark:text-white" 
+                                    <span class="w-8 text-center font-bold text-gray-900 dark:text-white"
                                         x-text="selectedPcsItems[namaPaket]?.jumlah || 0"></span>
                                     <button type="button" @click="incrementPcs(namaPaket)"
                                         class="w-8 h-8 rounded-lg bg-purple-500 hover:bg-purple-600 text-white font-bold transition flex items-center justify-center">
@@ -245,12 +241,13 @@
                                 </div>
                             </div>
 
-                            <!-- Subtotal & Remove Button -->
-                            <div class="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-600">
+                            <div
+                                class="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-600">
                                 <div>
                                     <p class="text-xs text-gray-500 dark:text-gray-400">Subtotal:</p>
-                                    <p class="font-bold text-purple-600 dark:text-purple-400" 
-                                        x-text="`Rp ${((selectedPcsItems[namaPaket]?.jumlah || 0) * (selectedPcsItems[namaPaket]?.harga || 0)).toLocaleString('id-ID')}`"></p>
+                                    <p class="font-bold text-purple-600 dark:text-purple-400"
+                                        x-text="`Rp ${((selectedPcsItems[namaPaket]?.jumlah || 0) * (selectedPcsItems[namaPaket]?.harga || 0)).toLocaleString('id-ID')}`">
+                                    </p>
                                 </div>
                                 <button type="button" @click="removePcsItem(namaPaket)"
                                     class="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-sm font-medium transition">
@@ -262,12 +259,12 @@
                 </template>
             </div>
 
-            <!-- Summary Total -->
             <div x-show="getTotalPcsItems() > 0" x-transition
                 class="mt-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4 border border-purple-200 dark:border-purple-800">
                 <div class="flex justify-between items-center mb-2">
                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Total Item:</span>
-                    <span class="font-bold text-gray-900 dark:text-white" x-text="`${getTotalPcsItems()} potong`"></span>
+                    <span class="font-bold text-gray-900 dark:text-white"
+                        x-text="`${getTotalPcsItems()} potong`"></span>
                 </div>
                 <div class="flex justify-between items-center">
                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Subtotal:</span>
@@ -276,7 +273,6 @@
                 </div>
             </div>
 
-            <!-- Hidden inputs for selected items -->
             <template x-for="(item, namaPaket) in selectedPcsItems" :key="namaPaket">
                 <div>
                     <input type="hidden" :name="`items[${item.paket_id}][paket_id]`" :value="item.paket_id">
@@ -286,7 +282,6 @@
         </div>
     </div>
 
-    <!-- Metode Pengantaran -->
     <div x-show="tipeOrder" x-transition>
         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Metode Pengantaran</label>
         <div class="grid grid-cols-2 gap-4">
@@ -315,13 +310,13 @@
         </div>
     </div>
 
-    <!-- Jarak Penjemputan (if dijemput) -->
     <div x-show="pickup === 'dijemput' && tipeOrder" x-transition class="space-y-4">
-        <!-- Tombol Deteksi Lokasi -->
-        <div class="flex items-center justify-between p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-200 dark:border-purple-800">
+        <div
+            class="flex items-center justify-between p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-200 dark:border-purple-800">
             <div class="flex-1">
                 <p class="text-sm font-semibold text-purple-900 dark:text-purple-300">Deteksi Lokasi Otomatis</p>
-                <p class="text-xs text-purple-700 dark:text-purple-400 mt-1">Klik untuk menghitung jarak & biaya pickup</p>
+                <p class="text-xs text-purple-700 dark:text-purple-400 mt-1">Klik untuk menghitung jarak & biaya pickup
+                </p>
             </div>
             <button type="button" @click="detectLocation()" :disabled="gettingLocation"
                 class="px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white text-sm font-semibold rounded-lg transition flex items-center gap-2 shadow-md">
@@ -336,11 +331,11 @@
             </button>
         </div>
 
-        <!-- Hasil Perhitungan -->
-        <div x-show="locationDetected" x-transition class="p-4 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800">
+        <div x-show="locationDetected" x-transition
+            class="p-4 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800">
             <div class="flex items-start gap-3">
-                <svg class="w-6 h-6 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
-                    viewBox="0 0 24 24">
+                <svg class="w-6 h-6 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -360,13 +355,11 @@
             </div>
         </div>
 
-        <!-- Hidden Fields -->
         <input type="hidden" id="jarak_km" name="jarak_km">
         <input type="hidden" id="latitude" name="latitude">
         <input type="hidden" id="longitude" name="longitude">
     </div>
 
-    <!-- Metode Pembayaran -->
     <div x-show="tipeOrder" x-transition>
         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Metode Pembayaran</label>
         <div class="grid grid-cols-2 gap-4">
@@ -395,12 +388,8 @@
                 </div>
             </label>
         </div>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-            <strong>QRIS:</strong> Anda akan diarahkan ke halaman pembayaran Midtrans setelah order dibuat.
-        </p>
     </div>
 
-    <!-- Submit Buttons -->
     <div class="mt-6 flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
         <button type="button" @click="showModal = false"
             class="px-5 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition">

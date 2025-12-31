@@ -202,20 +202,17 @@
     <button class="print-button" onclick="window.print()">🖨️ Cetak Resi</button>
 
     <div class="receipt-container">
-        <!-- Header -->
         <div class="header">
             <h1>{{ $laundryInfo['name'] }}</h1>
             <p>{{ $laundryInfo['address'] }}</p>
             <p>Telp: {{ $laundryInfo['phone'] }}</p>
         </div>
 
-        <!-- Receipt Title -->
         <div class="receipt-title">
             <h2>RESI LAUNDRY</h2>
             <div class="order-number">#{{ $order->antrian }}</div>
         </div>
 
-        <!-- Customer Info -->
         <div class="info-section">
             <h3>Informasi Customer</h3>
             <div class="info-grid">
@@ -232,7 +229,6 @@
             </div>
         </div>
 
-        <!-- Order Info -->
         <div class="info-section">
             <h3>Informasi Pesanan</h3>
             <div class="info-grid">
@@ -257,7 +253,6 @@
             </div>
         </div>
 
-        <!-- Items Table -->
         <table class="items-table">
             <thead>
                 <tr>
@@ -279,7 +274,6 @@
             </tbody>
         </table>
 
-        <!-- Total Section -->
         <div class="total-section">
             @if($order->pickup === 'dijemput' && $order->biaya_pickup > 0)
                 <div class="total-row">
@@ -294,7 +288,6 @@
             </div>
         </div>
 
-        <!-- Footer -->
         <div class="footer">
             <p><strong>Terima kasih atas kepercayaan Anda!</strong></p>
             <p>Resi ini dicetak pada {{ now()->format('d F Y, H:i') }}</p>

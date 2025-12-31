@@ -14,7 +14,6 @@
         }
     </script>
     
-    <!-- Initialize dark mode BEFORE Alpine loads -->
     <script>
         if (localStorage.getItem('darkMode') === 'true') {
             document.documentElement.classList.add('dark');
@@ -22,7 +21,6 @@
     </script>
     
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <!-- FullCalendar CSS -->
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet' />
 
     <link
@@ -211,15 +209,12 @@
                                 <span>Pengaturan</span>
                             </button>
 
-                            <!-- Dark Mode Toggle Slider -->
                             <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700">
                                 <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">Tema</p>
                                 <div class="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1 relative">
-                                    <!-- Sliding Background -->
                                     <div class="absolute top-1 bottom-1 left-1 w-[calc(50%-6px)] bg-white dark:bg-gray-600 rounded-md shadow-sm transition-transform duration-300 ease-in-out"
                                         :style="isDark ? 'transform: translateX(calc(100% + 4px))' : 'transform: translateX(0)'"></div>
                                     
-                                    <!-- Light Button -->
                                     <button @click="if(isDark) toggleDarkMode()" 
                                         class="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md transition-colors relative z-10"
                                         :class="!isDark ? 'text-gray-900' : 'text-gray-500 dark:text-gray-400'">
@@ -231,7 +226,6 @@
                                         <span class="text-xs font-medium">Light</span>
                                     </button>
                                     
-                                    <!-- Dark Button -->
                                     <button @click="if(!isDark) toggleDarkMode()" 
                                         class="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md transition-colors relative z-10"
                                         :class="isDark ? 'text-gray-900 dark:text-white' : 'text-gray-500'">

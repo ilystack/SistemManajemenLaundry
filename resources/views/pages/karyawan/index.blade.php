@@ -1,6 +1,5 @@
 <x-sidetop role="admin" title="Daftar Karyawan">
     <div x-data="{ showModal: false }" class="space-y-6">
-        <!-- Header -->
         <div class="flex justify-center items-center">
             <button @click="showModal = true"
                 class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all shadow-lg hover:shadow-xl flex items-center gap-2">
@@ -11,7 +10,6 @@
             </button>
         </div>
 
-        <!-- Success Message -->
         @if(session('success'))
             <div
                 class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200 px-4 py-3 rounded-lg">
@@ -19,7 +17,6 @@
             </div>
         @endif
 
-        <!-- Table -->
         <div
             class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div class="overflow-x-auto">
@@ -104,7 +101,6 @@
                 </table>
             </div>
 
-            <!-- Pagination -->
             @if($karyawans->hasPages())
                 <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
                     {{ $karyawans->links() }}
@@ -112,18 +108,15 @@
             @endif
         </div>
 
-        <!-- Floating Modal -->
         <div x-show="showModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto"
             aria-labelledby="modal-title" role="dialog" aria-modal="true">
 
-            <!-- Backdrop -->
             <div x-show="showModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
                 x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
                 x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
                 class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/80 backdrop-blur-sm transition-opacity"
                 @click="showModal = false"></div>
 
-            <!-- Panel -->
             <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-start sm:p-0">
                 <div x-show="showModal" x-transition:enter="ease-out duration-300"
                     x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -133,7 +126,6 @@
                     x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                     class="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-xl border border-gray-200 dark:border-gray-700">
 
-                    <!-- Modal Header -->
                     <div
                         class="px-4 py-4 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700 sm:px-6 flex justify-between items-center">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white" id="modal-title">
@@ -149,7 +141,6 @@
                         </button>
                     </div>
 
-                    <!-- Form -->
                     <form action="{{ route('karyawan.store') }}" method="POST" class="p-6 space-y-4">
                         @csrf
                         <div>

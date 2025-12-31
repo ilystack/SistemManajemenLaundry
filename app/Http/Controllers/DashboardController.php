@@ -16,7 +16,6 @@ class DashboardController extends Controller
         $today = Carbon::today();
         $thisMonth = Carbon::now()->month;
 
-        // Data real dari database
         $stats = [
             'orderan_hari_ini' => Order::whereDate('created_at', $today)->count(),
             'orderan_selesai' => Order::where('status', 'selesai')->count(),
@@ -25,7 +24,6 @@ class DashboardController extends Controller
                 ->count(),
         ];
 
-        // Orderan terbaru (limit 5)
         $orders = Order::with(['user', 'paket'])
             ->latest()
             ->limit(5)

@@ -131,7 +131,6 @@ class AbsensiController extends Controller
         ]);
     }
 
-    // Admin: View riwayat absensi
     public function index(Request $request)
     {
         $query = Absensi::with(['user', 'jamKerja'])->latest('tanggal');

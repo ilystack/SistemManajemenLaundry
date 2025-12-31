@@ -730,7 +730,6 @@
                     </div>
                 </div>
 
-                <!-- Minggu (TUTUP) -->
                 <div
                     class="bg-white p-8 sm:p-10 rounded-2xl sm:rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 scale-in">
                     <div class="flex items-center justify-center mb-6">
@@ -765,7 +764,6 @@
                 </div>
             </div>
 
-            <!-- Info Tambahan -->
             <div class="mt-8 sm:mt-12 text-center fade-in">
                 <div class="inline-block bg-white px-6 py-4 rounded-xl shadow-sm">
                     <p class="text-sm sm:text-base text-gray-600">

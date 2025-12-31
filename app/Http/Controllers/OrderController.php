@@ -51,7 +51,6 @@ class OrderController extends Controller
         $createdOrders = [];
 
         if ($request->tipe_order === 'kg') {
-            // PAKET KILOAN
             $request->validate([
                 'paket_id_kg' => 'required|exists:pakets,id',
                 'jumlah_kg' => 'required|numeric|min:0.1',

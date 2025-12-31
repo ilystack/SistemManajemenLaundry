@@ -1,9 +1,6 @@
 <x-sidetop role="admin" title="Dashboard Admin">
-    <!-- Dashboard Content -->
     <div class="space-y-6">
-        <!-- Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <!-- Total Orders -->
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700">
                 <div class="flex items-center justify-between">
                     <div>
@@ -21,7 +18,6 @@
                 </div>
             </div>
 
-            <!-- Total Revenue -->
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700">
                 <div class="flex items-center justify-between">
                     <div>
@@ -40,7 +36,6 @@
                 </div>
             </div>
 
-            <!-- Total Customers -->
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700">
                 <div class="flex items-center justify-between">
                     <div>
@@ -58,7 +53,6 @@
                 </div>
             </div>
 
-            <!-- Total Karyawan -->
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700">
                 <div class="flex items-center justify-between">
                     <div>
@@ -79,15 +73,12 @@
             </div>
         </div>
 
-        <!-- Recent Activity -->
         <div
             class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <!-- Header -->
             <div class="bg-gray-100 dark:bg-gray-700 px-6 py-4 border-b border-gray-200 dark:border-gray-600">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Aktivitas Terbaru</h2>
             </div>
 
-            <!-- Content -->
             <div class="p-6">
                 @if($recentActivities->count() > 0)
                     <div class="space-y-3 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
@@ -177,14 +168,12 @@
             </div>
         </div>
 
-        <!-- Calendar -->
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Kalender</h2>
             <div id="calendar"></div>
         </div>
     </div>
 
-    <!-- FullCalendar CSS & JS -->
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet' />
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
 

@@ -80,22 +80,17 @@
 </head>
 
 <body style="background-color: #fffafa;" class="min-h-screen flex items-center justify-center p-4 sm:p-6">
-    <!-- Toast Notification Component -->
     @include('components.toast')
 
-    <!-- Main Card Container -->
     <div class="w-full max-w-6xl">
         <div class="bg-white rounded-2xl sm:rounded-3xl overflow-hidden animate-fadeInUp border border-gray-200">
             <div class="flex flex-col-reverse md:flex-row">
-                <!-- Left Panel - Login Form (40%) -->
                 <div class="md:w-2/5 p-8 sm:p-10 lg:p-12 xl:p-16 border-r border-gray-200">
-                    <!-- Title -->
                     <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-10 tracking-tight text-center">
                         LOGIN {{ strtoupper($role ?? 'ADMIN') }}
                     </h1>
                     <br>
 
-                    <!-- Trigger Toast for Errors -->
                     @if ($errors->any())
                         <script>
                             document.addEventListener('DOMContentLoaded', function () {
@@ -112,23 +107,19 @@
                         </script>
                     @endif
 
-                    <!-- Form -->
                     <form method="POST" action="/login/{{ $role ?? 'admin' }}" class="space-y-6">
                         @csrf
 
-                        <!-- Email/Nama Input -->
                         <div class="space-y-2">
                             <input type="email" id="email" name="email"
                                 class="w-full px-4 py-3.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 text-base focus:outline-none focus:border-blue-400 transition-all duration-300"
                                 placeholder="Email" required>
                         </div>
 
-                        <!-- Password Input -->
                         <div class="space-y-2 relative">
                             <input type="password" id="password" name="password"
                                 class="w-full px-4 py-3.5 pr-12 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 text-base focus:outline-none focus:border-blue-400 transition-all duration-300"
                                 placeholder="Password" required>
-                            <!-- Toggle Password Visibility -->
                             <button type="button" onclick="togglePassword()"
                                 class="absolute right-4 top-2 text-gray-500 hover:text-gray-700 focus:outline-none transition-colors duration-200">
                                 <svg id="eye-icon" class="w-5 h-5" fill="none" stroke="currentColor"
@@ -146,7 +137,6 @@
                             </button>
                         </div>
 
-                        <!-- Remember Me Checkbox -->
                         <div class="flex items-center pt-2">
                             <input type="checkbox" id="simpan-login" name="remember"
                                 class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer transition-all duration-200">
@@ -156,7 +146,6 @@
                             </label>
                         </div>
 
-                        <!-- Login Button -->
                         <button type="submit"
                             class="w-full mt-6 py-3.5 px-6 bg-gradient-to-r from-blue-600 to-blue-700 hover:bg-none hover:bg-transparent hover:text-blue-700 border-2 border-transparent hover:border-blue-700 text-white text-base font-semibold rounded-lg transition-all duration-300 ease-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                             LOGIN
@@ -164,10 +153,8 @@
                     </form>
                 </div>
 
-                <!-- Right Panel - Branding (60%) -->
                 <div
                     class="md:w-3/5 relative bg-gradient-to-br from-cyan-50 via-blue-50 to-sky-100 p-8 sm:p-10 md:p-12 lg:p-16 flex items-center justify-center overflow-hidden min-h-[400px] md:min-h-0">
-                    <!-- Decorative Circles -->
                     <div
                         class="absolute top-[8%] right-[12%] w-32 h-32 sm:w-40 sm:h-40 bg-blue-200/30 rounded-full animate-float blur-sm">
                     </div>
@@ -178,7 +165,6 @@
                     <div class="absolute bottom-[15%] left-[8%] w-36 h-36 sm:w-48 sm:h-48 bg-blue-300/20 rounded-full animate-float blur-sm"
                         style="animation-delay: 1.5s;"></div>
 
-                    <!-- Additional decorative elements -->
                     <div
                         class="absolute top-[35%] right-[35%] w-16 h-16 sm:w-24 sm:h-24 bg-sky-300/20 rounded-full animate-pulse-slow blur-md">
                     </div>
@@ -187,9 +173,7 @@
                     <div class="absolute top-[50%] left-[50%] w-20 h-20 sm:w-28 sm:h-28 bg-blue-400/10 rounded-full animate-pulse-slow blur-lg"
                         style="animation-delay: 1s;"></div>
 
-                    <!-- Branding Content -->
                     <div class="relative z-10 text-center">
-                        <!-- Logo -->
                         <div class="transform hover:scale-105 transition-transform duration-500 ease-out">
                             <img src="{{ asset('assets/logoalmas.png') }}" alt="ALMAS LAUNDRY Logo"
                                 class="w-56 sm:w-64 md:w-72 lg:w-80 h-auto mx-auto drop-shadow-2xl filter">

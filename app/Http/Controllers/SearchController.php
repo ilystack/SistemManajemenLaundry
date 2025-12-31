@@ -20,7 +20,6 @@ class SearchController extends Controller
 
         $results = [];
 
-        // Search Orders
         $orders = Order::with(['user', 'paket'])
             ->where('antrian', 'like', "%{$query}%")
             ->orWhereHas('user', function ($q) use ($query) {
@@ -43,7 +42,6 @@ class SearchController extends Controller
             ];
         }
 
-        // Search Customers
         $customers = User::where('role', 'customer')
             ->where(function ($q) use ($query) {
                 $q->where('name', 'like', "%{$query}%")
@@ -64,7 +62,6 @@ class SearchController extends Controller
             ];
         }
 
-        // Search Karyawan
         $karyawans = User::where('role', 'karyawan')
             ->where(function ($q) use ($query) {
                 $q->where('name', 'like', "%{$query}%")
@@ -85,7 +82,6 @@ class SearchController extends Controller
             ];
         }
 
-        // Search Paket
         $pakets = Paket::where('nama', 'like', "%{$query}%")
             ->orWhere('kode', 'like', "%{$query}%")
             ->limit(5)
@@ -102,7 +98,6 @@ class SearchController extends Controller
             ];
         }
 
-        // Search Gaji
         $gajis = Gaji::with('karyawan')
             ->whereHas('karyawan', function ($q) use ($query) {
                 $q->where('name', 'like', "%{$query}%");

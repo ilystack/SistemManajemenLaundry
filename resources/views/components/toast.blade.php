@@ -73,7 +73,6 @@
                     </div>
                 </template>
 
-                <!-- Danger Notification -->
                 <template x-if="notification.variant === 'danger'">
                     <div x-data="{ isVisible: false, timeout: null }" x-cloak x-show="isVisible" role="alert"
                         x-on:pause-auto-dismiss.window="clearTimeout(timeout)"
@@ -104,7 +103,6 @@
                     </div>
                 </template>
 
-                <!-- Warning Notification -->
                 <template x-if="notification.variant === 'warning'">
                     <div x-data="{ isVisible: false, timeout: null }" x-cloak x-show="isVisible" role="alert"
                         x-on:pause-auto-dismiss.window="clearTimeout(timeout)"
@@ -136,7 +134,6 @@
                     </div>
                 </template>
 
-                <!-- Info Notification -->
                 <template x-if="notification.variant === 'info'">
                     <div x-data="{ isVisible: false, timeout: null }" x-cloak x-show="isVisible" role="alert"
                         x-on:pause-auto-dismiss.window="clearTimeout(timeout)"
@@ -171,7 +168,6 @@
     </div>
 </div>
 
-<!-- Auto-trigger from Laravel Session Flash -->
 @if(session('toast'))
     <script>
         (function () {

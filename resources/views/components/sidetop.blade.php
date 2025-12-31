@@ -11,17 +11,14 @@
     <link rel="icon" type="image/png" href="{{ asset('assets/icon.png') }}">
     <title>{{ $title }} - Almas Laundry</title>
 
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Tailwind Config for Dark Mode -->
     <script>
         tailwind.config = {
             darkMode: 'class',
         }
     </script>
 
-    <!-- Alpine.js CDN -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
@@ -64,23 +61,19 @@
 
 
     <div x-data="{ sidebarIsOpen: false }">
-        <!-- Skip to main content (accessibility) -->
         <a class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded"
             href="#main-content">
             Skip to main content
         </a>
 
-        <!-- Dark overlay for mobile sidebar -->
         <div x-cloak x-show="sidebarIsOpen" class="fixed inset-0 z-40 bg-black/50 lg:hidden" aria-hidden="true"
             x-on:click="sidebarIsOpen = false" x-transition.opacity>
         </div>
 
-        <!-- Sidebar -->
         <nav x-cloak
             class="fixed top-0 left-0 z-50 h-screen w-60 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-transform duration-300 lg:translate-x-0"
             x-bind:class="sidebarIsOpen ? 'translate-x-0' : '-translate-x-60'" aria-label="sidebar navigation">
 
-            <!-- Logo -->
             @php
                 $adminUser = \App\Models\User::where('role', 'admin')->first();
                 $laundryLogo = $adminUser && $adminUser->laundry_logo ? Storage::url($adminUser->laundry_logo) : asset('assets/logoalmas.png');
@@ -89,7 +82,6 @@
                 <img src="{{ $laundryLogo }}" alt="Laundry Logo" class="h-10 w-auto object-contain">
             </div>
 
-            <!-- Global Search -->
             <div class="px-4 pb-4" x-data="{ 
                 searchQuery: '', 
                 searchResults: [], 
@@ -119,14 +111,12 @@
                         @focus="if(searchQuery.length >= 2) showResults = true" placeholder="Cari apapun..."
                         class="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white placeholder-gray-400">
 
-                    <!-- Search Icon -->
                     <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none"
                         stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
 
-                    <!-- Loading Spinner -->
                     <svg x-show="isSearching"
                         class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500 animate-spin" fill="none"
                         viewBox="0 0 24 24">
@@ -137,7 +127,6 @@
                         </path>
                     </svg>
 
-                    <!-- Clear Button -->
                     <button x-show="searchQuery.length > 0 && !isSearching"
                         @click="searchQuery = ''; searchResults = []; showResults = false" type="button"
                         class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
@@ -147,7 +136,6 @@
                         </svg>
                     </button>
 
-                    <!-- Search Results Dropdown -->
                     <div x-show="showResults && searchResults.length > 0" x-cloak
                         class="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 max-h-96 overflow-y-auto z-50">
                         <template x-for="result in searchResults" :key="result.title">
@@ -167,7 +155,6 @@
                         </template>
                     </div>
 
-                    <!-- No Results -->
                     <div x-show="showResults && searchResults.length === 0 && searchQuery.length >= 2 && !isSearching"
                         x-cloak
                         class="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 z-50">
@@ -176,10 +163,8 @@
                 </div>
             </div>
 
-            <!-- Sidebar Menu -->
             <div class="flex flex-col gap-1 p-4 overflow-y-auto h-[calc(100vh-100px)]">
                 @if($role === 'admin')
-                    <!-- Admin Menu -->
                     <a href="{{ route('admin.dashboard') }}"
                         class="flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors {{ request()->routeIs('admin.dashboard') ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : '' }}">
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -263,8 +248,6 @@
                     </a>
 
                 @elseif($role === 'karyawan')
-                    <!-- Karyawan Menu -->
-                    <!-- Tombol Tambah Order (Prominent) -->
                     <button onclick="window.dispatchEvent(new CustomEvent('open-order-modal'))"
                         class="flex items-center justify-center gap-2 px-4 py-3 mb-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl w-full">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -315,15 +298,11 @@
             </div>
         </nav>
 
-        <!-- Main Content Area -->
         <div class="lg:ml-60 min-h-screen flex flex-col">
-            <!-- Top Navbar -->
             <nav class="sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3"
                 aria-label="top navigation bar">
                 <div class="flex items-center justify-between">
-                    <!-- Left: Mobile toggle + Breadcrumb -->
                     <div class="flex items-center gap-4">
-                        <!-- Mobile sidebar toggle -->
                         <button type="button"
                             class="lg:hidden p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
                             x-on:click="sidebarIsOpen = true">
@@ -335,7 +314,6 @@
                             <span class="sr-only">Toggle sidebar</span>
                         </button>
 
-                        <!-- Breadcrumb -->
                         <nav aria-label="breadcrumb">
                             <ol class="flex items-center gap-2 text-sm">
                                 <li>
@@ -355,9 +333,7 @@
                         </nav>
                     </div>
 
-                    <!-- Right: Profile only (dark mode moved to dropdown) -->
                     <div class="flex items-center gap-3">
-                        <!-- Profile Dropdown -->
                         <div x-data="{ userDropdownIsOpen: false }" class="relative"
                             x-on:keydown.esc.window="userDropdownIsOpen = false">
                             <button type="button"
@@ -382,7 +358,6 @@
                                 </div>
                             </button>
 
-                            <!-- Dropdown Menu -->
                             <div x-cloak x-show="userDropdownIsOpen"
                                 class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1"
                                 x-on:click.outside="userDropdownIsOpen = false" x-transition>
@@ -406,17 +381,14 @@
                                     </button>
                                 @endif
 
-                                <!-- Dark Mode Toggle Slider -->
                                 <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700">
                                     <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">Tema</p>
                                     <div
                                         class="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1 relative">
-                                        <!-- Sliding Background -->
                                         <div class="absolute top-1 bottom-1 left-1 w-[calc(50%-6px)] bg-white dark:bg-gray-600 rounded-md shadow-sm transition-transform duration-300 ease-in-out"
                                             :style="darkMode ? 'transform: translateX(calc(100% + 4px))' : 'transform: translateX(0)'">
                                         </div>
 
-                                        <!-- Light Button -->
                                         <button @click="if(darkMode) darkMode = !darkMode" type="button"
                                             class="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md transition-colors relative z-10"
                                             :class="!darkMode ? 'text-gray-900' : 'text-gray-500 dark:text-gray-400'">
@@ -427,7 +399,6 @@
                                             <span class="text-xs font-medium">Light</span>
                                         </button>
 
-                                        <!-- Dark Button -->
                                         <button @click="if(!darkMode) darkMode = !darkMode" type="button"
                                             class="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md transition-colors relative z-10"
                                             :class="darkMode ? 'text-white' : 'text-gray-500'">
@@ -463,20 +434,16 @@
                 </div>
             </nav>
 
-            <!-- Main Content -->
             <main id="main-content" class="flex-1 p-6 bg-gray-50 dark:bg-gray-900">
                 {{ $slot }}
             </main>
         </div>
     </div>
 
-    <!-- Toast Notification Component -->
     @include('components.toast')
 
-    <!-- Edit Profile Modal -->
     @include('components.edit-profile-modal')
 
-    <!-- Settings Modal (Admin Only) -->
     @if(Auth::check() && Auth::user()->role === 'admin')
         @include('components.settings-modal')
     @endif

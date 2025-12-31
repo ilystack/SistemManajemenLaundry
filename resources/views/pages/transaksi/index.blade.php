@@ -1,6 +1,5 @@
 <x-sidetop :role="Auth::user()->role" title="Riwayat Transaksi">
     <div class="space-y-6">
-        <!-- Header -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg shadow-lg p-6 text-white">
                 <div class="flex items-center justify-between">
@@ -33,7 +32,6 @@
             </div>
         </div>
 
-        <!-- Table -->
         <div
             class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div class="overflow-x-auto">
@@ -117,7 +115,6 @@
                 </table>
             </div>
 
-            <!-- Pagination -->
             @if($transaksis->hasPages())
                 <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
                     {{ $transaksis->links() }}

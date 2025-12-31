@@ -80,10 +80,8 @@
 </head>
 
 <body style="background-color: #fffafa;" class="min-h-screen flex items-center justify-center p-4 sm:p-6">
-    <!-- Toast Notification Component -->
     @include('components.toast')
 
-    <!-- Main Card Container -->
     <div class="w-full max-w-6xl">
         <div class="bg-white rounded-2xl sm:rounded-3xl overflow-hidden animate-fadeInUp border border-gray-200">
             <div class="flex flex-col md:flex-row">
@@ -154,26 +152,22 @@
                                 placeholder="Nama Lengkap" required autofocus>
                         </div>
 
-                        <!-- WhatsApp Number Input -->
                         <div class="space-y-2">
                             <input type="tel" id="phone" name="phone" value="{{ old('phone') }}"
                                 class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 text-base focus:outline-none focus:border-blue-400 transition-all duration-300"
                                 placeholder="Nomor WhatsApp (contoh: 08123456789)" required pattern="[0-9]{10,13}">
                         </div>
 
-                        <!-- Email Input -->
                         <div class="space-y-2">
                             <input type="email" id="email" name="email" value="{{ old('email') }}"
                                 class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 text-base focus:outline-none focus:border-blue-400 transition-all duration-300"
                                 placeholder="Alamat Email" required>
                         </div>
 
-                        <!-- Password Input -->
                         <div class="space-y-2 relative">
                             <input type="password" id="password" name="password"
                                 class="w-full px-4 py-3 pr-12 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 text-base focus:outline-none focus:border-blue-400 transition-all duration-300"
                                 placeholder="Password" required>
-                            <!-- Toggle -->
                             <button type="button" onclick="togglePassword('password', 'eye-icon', 'eye-slash-icon')"
                                 class="absolute right-4 top-1 text-gray-500 hover:text-gray-700 focus:outline-none transition-colors duration-200">
                                 <svg id="eye-icon" class="w-5 h-5" fill="none" stroke="currentColor"
@@ -191,12 +185,10 @@
                             </button>
                         </div>
 
-                        <!-- Confirm Password Input -->
                         <div class="space-y-2 relative">
                             <input type="password" id="password_confirmation" name="password_confirmation"
                                 class="w-full px-4 py-3 pr-12 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 text-base focus:outline-none focus:border-blue-400 transition-all duration-300"
                                 placeholder="Konfirmasi Password" required>
-                            <!-- Toggle -->
                             <button type="button"
                                 onclick="togglePassword('password_confirmation', 'eye-icon-confirm', 'eye-slash-icon-confirm')"
                                 class="absolute right-4 top-1 text-gray-500 hover:text-gray-700 focus:outline-none transition-colors duration-200">
@@ -215,7 +207,6 @@
                             </button>
                         </div>
 
-                        <!-- Submit Button -->
                         <button type="submit"
                             class="w-full mt-2 py-3.5 px-6 bg-gradient-to-r from-blue-600 to-blue-700 hover:bg-none hover:bg-transparent hover:text-blue-700 border-2 border-transparent hover:border-blue-700 text-white text-base font-semibold rounded-lg transition-all duration-300 ease-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-md">
                             DAFTAR SEKARANG

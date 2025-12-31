@@ -51,7 +51,6 @@
                     </select>
                 </div>
 
-                <!-- Buttons -->
                 <div class="flex items-end gap-2">
                     <button type="submit"
                         class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition duration-200">
@@ -65,7 +64,6 @@
             </form>
         </div>
 
-        <!-- Table -->
         <div
             class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 overflow-hidden">
             <div class="overflow-x-auto">
@@ -206,7 +204,6 @@
                 </table>
             </div>
 
-            <!-- Pagination -->
             @if ($absensis->hasPages())
                 <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
                     {{ $absensis->links() }}
@@ -215,7 +212,6 @@
         </div>
     </div>
 
-    <!-- Modal Foto Selfie -->
     <div x-data="{ showModal: false, fotoUrl: '', namaKaryawan: '' }" x-show="showModal" x-cloak
         class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
 
