@@ -166,6 +166,7 @@
         <div>
             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Pilih Paket Kiloan</label>
             <select name="paket_id_kg" x-model="selectedPaketKg" :required="tipeOrder === 'kg'"
+                :disabled="tipeOrder !== 'kg'"
                 class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 dark:text-white focus:bg-white dark:focus:bg-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 transition-all">
                 <option value="" disabled selected>-- Pilih Paket --</option>
                 <template x-for="paket in paketKg" :key="paket.id">
@@ -179,7 +180,7 @@
             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Berat (Kilogram)</label>
             <div class="relative">
                 <input type="number" name="jumlah_kg" x-model="jumlahKg" min="0.1" step="0.1" placeholder="Contoh: 3.5"
-                    :required="tipeOrder === 'kg'"
+                    :required="tipeOrder === 'kg'" :disabled="tipeOrder !== 'kg'"
                     class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 dark:text-white focus:bg-white dark:focus:bg-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 transition-all pr-12">
                 <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                     <span class="text-gray-500 dark:text-gray-400 font-medium text-sm">kg</span>
