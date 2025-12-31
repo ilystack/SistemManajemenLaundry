@@ -23,7 +23,7 @@ class JamKerjaController extends Controller
             'toleransi_menit' => 'required|integer|min:0',
         ]);
 
-        JamKerja::create($request->all());
+        JamKerja::create($request->validated());
 
         return redirect()->route('jam-kerja.index')
             ->with('toast', ['variant' => 'success', 'title' => 'Berhasil', 'message' => 'Jam kerja berhasil ditambahkan']);
@@ -39,7 +39,7 @@ class JamKerjaController extends Controller
             'toleransi_menit' => 'required|integer|min:0',
         ]);
 
-        $jamKerja->update($request->all());
+        $jamKerja->update($request->validated());
 
         return redirect()->route('jam-kerja.index')
             ->with('toast', ['variant' => 'success', 'title' => 'Berhasil', 'message' => 'Jam kerja berhasil diupdate']);

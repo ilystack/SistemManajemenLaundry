@@ -227,16 +227,16 @@
 
     <section class="min-h-screen flex items-center pt-16 px-4 sm:px-6">
         <div class="max-w-7xl mx-auto w-full">
-            <div class="grid md:grid-cols-2 gap-8 lg:gap-12 items-cente ml-10">
+            <div class="grid md:grid-cols-2 gap-8 lg:gap-12 items-center">
                 <div class="slide-in-left text-center md:text-left">
                     <h1
-                        class="text-5xl sm:text-6xl md:text-6xl lg:text-1xl font-black text-gray-900 mb-4 sm:mb-6 leading-tight">
+                        class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-gray-900 mb-4 sm:mb-6 leading-tight">
                         Laundry Cepat,<br>
                         <span class="text-blue-600">Bersih</span>, dan<br>
                         <span class="text-blue-600">Wangi</span>
                     </h1>
                     <p
-                        class="text-base sm:text-lg md:text-lg text-gray-600 mb-6 sm:mb-8 leading-relaxed font-normal max-w-lg mx-auto md:mx-0">
+                        class="text-base sm:text-lg md:text-xl text-gray-600 mb-6 sm:mb-8 leading-relaxed font-normal max-w-lg mx-auto md:mx-0">
                         Layanan laundry profesional dengan harga transparan dan tracking status real-time.
                     </p>
                     <button onclick="document.getElementById('layanan').scrollIntoView({behavior: 'smooth'})"
@@ -261,7 +261,7 @@
                                     class="w-32 h-32 sm:w-40 sm:h-40 lg:w-48 lg:h-48 mx-auto bg-gradient-to-br from-blue-400 to-blue-500 rounded-full flex items-center justify-center shadow-inner relative overflow-hidden">
 
                                     <img src="/assets/heroimg.png" alt="Hero Laundry"
-                                        class="w-48 h-48 sm:w-48 sm:h-48 lg:w-48 lg:h-48 object-contain" id="spinner">
+                                        class="w-32 h-32 sm:w-40 sm:h-40 lg:w-48 lg:h-48 object-contain" id="spinner">
                                 </div>
                                 <div class="mt-3 sm:mt-4 flex justify-center space-x-1 sm:space-x-2">
                                     <div class="w-12 h-1 sm:w-16 sm:h-2 bg-gray-200 rounded"></div>
@@ -497,116 +497,133 @@
         </div>
 
         @if($paketPcs->count() > 0)
-            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            <div class="space-y-8">
                 @php
                     $groupedPakets = $paketPcs->groupBy('nama');
                 @endphp
 
                 @foreach($groupedPakets as $namaPaket => $pakets)
-                    @foreach($pakets as $paket)
-                        @php
-                            $isPopular = $paket->jenis_layanan === 'cuci_setrika';
-                            $cardClass = $isPopular
-                                ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-lg transform hover:shadow-2xl'
-                                : 'bg-white shadow-sm hover:shadow-xl';
-                        @endphp
-
-                        <div
-                            class="{{$cardClass}} p-6 sm:p-8 rounded-xl sm:rounded-2xl transition-all duration-300 scale-in {{ $isPopular ? 'sm:col-span-2 lg:col-span-1' : '' }}">
-                            @if($isPopular)
-                                <div class="text-white text-xs sm:text-sm font-bold mb-3 sm:mb-4">PALING POPULER</div>
-                            @endif
-
-                            <h3 class="text-lg sm:text-xl font-bold {{ $isPopular ? 'text-white' : 'text-gray-900' }} mb-2">
-                                {{ $paket->nama }} - {{ $paket->jenis_layanan_label }}
+                    <div
+                        class="bg-gradient-to-br from-gray-50 to-white border-2 border-gray-200 rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-sm hover:shadow-xl transition-all duration-300 scale-in">
+                        <div class="mb-6">
+                            <h3 class="text-2xl sm:text-3xl font-black text-gray-900 mb-2">
+                                {{ $namaPaket }}
                             </h3>
-
-                            <div
-                                class="text-3xl sm:text-4xl lg:text-5xl font-black {{ $isPopular ? 'text-white' : 'text-blue-600' }} mb-4 sm:mb-6">
-                                Rp {{ number_format($paket->harga, 0, ',', '.') }}
-                                <span
-                                    class="text-sm sm:text-lg {{ $isPopular ? 'text-blue-200' : 'text-gray-600' }} font-normal">/pcs</span>
-                            </div>
-
-                            <ul
-                                class="space-y-2 sm:space-y-3 text-sm sm:text-base {{ $isPopular ? 'text-white' : 'text-gray-600' }} mb-4 sm:mb-6">
-                                @if($paket->jenis_layanan === 'cuci_saja')
-                                    <li class="flex items-center">
-                                        <svg class="w-4 h-4 sm:w-5 sm:h-5 {{ $isPopular ? 'text-white' : 'text-blue-600' }} mr-2 flex-shrink-0"
-                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                        </svg>
-                                        Cuci bersih
-                                    </li>
-                                    <li class="flex items-center">
-                                        <svg class="w-4 h-4 sm:w-5 sm:h-5 {{ $isPopular ? 'text-white' : 'text-blue-600' }} mr-2 flex-shrink-0"
-                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                        </svg>
-                                        Dikeringkan
-                                    </li>
-                                    <li class="flex items-center">
-                                        <svg class="w-4 h-4 sm:w-5 sm:h-5 {{ $isPopular ? 'text-white' : 'text-blue-600' }} mr-2 flex-shrink-0"
-                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                        </svg>
-                                        Estimasi {{ $paket->estimasi_hari }} hari
-                                    </li>
-                                @elseif($paket->jenis_layanan === 'cuci_setrika')
-                                    <li class="flex items-center">
-                                        <svg class="w-4 h-4 sm:w-5 sm:h-5 {{ $isPopular ? 'text-white' : 'text-blue-600' }} mr-2 flex-shrink-0"
-                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                        </svg>
-                                        Cuci bersih
-                                    </li>
-                                    <li class="flex items-center">
-                                        <svg class="w-4 h-4 sm:w-5 sm:h-5 {{ $isPopular ? 'text-white' : 'text-blue-600' }} mr-2 flex-shrink-0"
-                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                        </svg>
-                                        Disetrika rapi
-                                    </li>
-                                    <li class="flex items-center">
-                                        <svg class="w-4 h-4 sm:w-5 sm:h-5 {{ $isPopular ? 'text-white' : 'text-blue-600' }} mr-2 flex-shrink-0"
-                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                        </svg>
-                                        Estimasi {{ $paket->estimasi_hari }} hari
-                                    </li>
-                                @elseif($paket->jenis_layanan === 'kilat')
-                                    <li class="flex items-center">
-                                        <svg class="w-4 h-4 sm:w-5 sm:h-5 {{ $isPopular ? 'text-white' : 'text-blue-600' }} mr-2 flex-shrink-0"
-                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                        </svg>
-                                        Selesai 3 jam
-                                    </li>
-                                    <li class="flex items-center">
-                                        <svg class="w-4 h-4 sm:w-5 sm:h-5 {{ $isPopular ? 'text-white' : 'text-blue-600' }} mr-2 flex-shrink-0"
-                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                        </svg>
-                                        Cuci + setrika
-                                    </li>
-                                    <li class="flex items-center">
-                                        <svg class="w-4 h-4 sm:w-5 sm:h-5 {{ $isPopular ? 'text-white' : 'text-blue-600' }} mr-2 flex-shrink-0"
-                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                        </svg>
-                                        Prioritas
-                                    </li>
-                                @endif
-                            </ul>
-
-                            @if($isPopular)
-                                <button onclick="scrollToContact()"
-                                    class="w-full bg-white text-blue-600 py-2 sm:py-3 rounded-lg font-semibold hover:bg-blue-50 transition text-sm sm:text-base">
-                                    Pilih Paket
-                                </button>
-                            @endif
+                            <p class="text-gray-600 text-sm sm:text-base">Pilih jenis layanan yang kamu butuhkan</p>
                         </div>
-                    @endforeach
+
+                        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                            @foreach($pakets as $paket)
+                                            @php
+                                                $isPopular = $paket->jenis_layanan === 'cuci_setrika';
+                                                $cardClass = $isPopular
+                                                    ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-lg border-2 border-blue-500'
+                                                    : 'bg-white border-2 border-gray-200 hover:border-blue-300';
+                                            @endphp
+
+                                 <div
+                                                class="{{ $cardClass }} p-5 sm:p-6 rounded-xl transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1">
+                                                @if($isPopular)
+                                                    <div class="inline-block bg-white text-blue-600 px-3 py-1 rounded-full text-xs font-bold mb-3">
+                                                        ⭐ POPULER
+                                                    </div>
+                                                @endif
+
+                                                <div class="mb-4">
+                                                    <h4
+                                                        class="text-lg sm:text-xl font-bold {{ $isPopular ? 'text-white' : 'text-gray-900' }} mb-1">
+                                                        {{ $paket->jenis_layanan_label }}
+                                                    </h4>
+                                                    <div
+                                                        class="text-3xl sm:text-4xl font-black {{ $isPopular ? 'text-white' : 'text-blue-600' }}">
+                                                        Rp {{ number_format($paket->harga, 0, ',', '.') }}
+                                                        <span
+                                                            class="text-sm {{ $isPopular ? 'text-blue-200' : 'text-gray-600' }} font-normal">/pcs</span>
+                                                    </div>
+                                                </div>
+
+                                                <ul class="space-y-2 text-sm {{ $isPopular ? 'text-white' : 'text-gray-600' }}">
+                                                    @if($paket->jenis_layanan === 'cuci_saja')
+                                                        <li class="flex items-center">
+                                                            <svg class="w-4 h-4 {{ $isPopular ? 'text-white' : 'text-blue-600' }} mr-2 flex-shrink-0"
+                                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                    d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                            Cuci bersih
+                                                        </li>
+                                                        <li class="flex items-center">
+                                                            <svg class="w-4 h-4 {{ $isPopular ? 'text-white' : 'text-blue-600' }} mr-2 flex-shrink-0"
+                                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                    d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                            Dikeringkan
+                                                        </li>
+                                                        <li class="flex items-center">
+                                                            <svg class="w-4 h-4 {{ $isPopular ? 'text-white' : 'text-blue-600' }} mr-2 flex-shrink-0"
+                                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                    d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                            {{ $paket->estimasi_hari }} hari
+                                                        </li>
+                                                    @elseif($paket->jenis_layanan === 'cuci_setrika')
+                                                        <li class="flex items-center">
+                                                            <svg class="w-4 h-4 {{ $isPopular ? 'text-white' : 'text-blue-600' }} mr-2 flex-shrink-0"
+                                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                    d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                            Cuci bersih
+                                                        </li>
+                                                        <li class="flex items-center">
+                                                            <svg class="w-4 h-4 {{ $isPopular ? 'text-white' : 'text-blue-600' }} mr-2 flex-shrink-0"
+                                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                    d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                            Disetrika rapi
+                                                        </li>
+                                                        <li class="flex items-center">
+                                                            <svg class="w-4 h-4 {{ $isPopular ? 'text-white' : 'text-blue-600' }} mr-2 flex-shrink-0"
+                                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                    d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                            {{ $paket->estimasi_hari }} hari
+                                                        </li>
+                                                    @elseif($paket->jenis_layanan === 'kilat')
+                                                        <li class="flex items-center">
+                                                            <svg class="w-4 h-4 {{ $isPopular ? 'text-white' : 'text-blue-600' }} mr-2 flex-shrink-0"
+                                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                    d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                            Selesai 3 jam
+                                                        </li>
+                                                        <li class="flex items-center">
+                                                            <svg class="w-4 h-4 {{ $isPopular ? 'text-white' : 'text-blue-600' }} mr-2 flex-shrink-0"
+                                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                    d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                            Cuci + setrika
+                                                        </li>
+                                                        <li class="flex items-center">
+                                                            <svg class="w-4 h-4 {{ $isPopular ? 'text-white' : 'text-blue-600' }} mr-2 flex-shrink-0"
+                                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                    d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                            Prioritas
+                                                        </li>
+                                                    @endif
+                                                </ul>
+                                            </div>
+                            @endforeach
+                        </div>
+                    </div>
                 @endforeach
             </div>
         @else
