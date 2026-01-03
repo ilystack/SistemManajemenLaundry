@@ -522,16 +522,33 @@
          * @param {string} url - URL to redirect to
          */
         window.loadingRedirect = function (url) {
+            // Set flag to indicate this is a forward navigation
+            sessionStorage.setItem('isForwardNavigation', 'true');
             showLoading();
             setTimeout(() => {
                 window.location.href = url;
             }, 100);
         };
 
+        // Hide loading immediately if this is a back/forward navigation
+        (function () {
+            const navigationType = performance.getEntriesByType('navigation')[0]?.type;
+            const isForwardNav = sessionStorage.getItem('isForwardNavigation') === 'true';
+
+            // If it's back_forward navigation and NOT a forward nav we initiated, hide loading
+            if (navigationType === 'back_forward' && !isForwardNav) {
+                hideLoading();
+            }
+
+            // Clear the flag after checking
+            sessionStorage.removeItem('isForwardNavigation');
+        })();
+
         document.addEventListener('DOMContentLoaded', function () {
             document.querySelectorAll('form').forEach(form => {
                 form.addEventListener('submit', function (e) {
                     if (this.checkValidity() && !this.querySelector('input[type="search"]')) {
+                        sessionStorage.setItem('isForwardNavigation', 'true');
                         showLoading();
                     }
                 });
@@ -547,6 +564,7 @@
                         loadingRedirect(href);
                     }
                     else if (onclick && onclick.includes('location.href')) {
+                        sessionStorage.setItem('isForwardNavigation', 'true');
                         showLoading();
                     }
                 });
@@ -555,6 +573,7 @@
             document.querySelectorAll('nav a[href]:not([href^="#"]):not([href^="javascript:"])').forEach(link => {
                 link.addEventListener('click', function (e) {
                     if (!this.closest('[x-data]') && !this.classList.contains('no-loading')) {
+                        sessionStorage.setItem('isForwardNavigation', 'true');
                         showLoading();
                     }
                 });
@@ -563,15 +582,24 @@
             document.querySelectorAll('button[onclick*="location.href"]').forEach(button => {
                 const originalOnclick = button.getAttribute('onclick');
                 if (!originalOnclick.includes('showLoading')) {
-                    button.setAttribute('onclick', `showLoading(); ${originalOnclick}`);
+                    button.setAttribute('onclick', `sessionStorage.setItem('isForwardNavigation', 'true'); showLoading(); ${originalOnclick}`);
                 }
             });
         });
 
+        // Handle browser back/forward button and page restore from cache
         window.addEventListener('pageshow', function (event) {
+            // If page is restored from cache (bfcache)
             if (event.persisted) {
                 hideLoading();
+                sessionStorage.removeItem('isForwardNavigation');
             }
+        });
+
+        // Additional safety: hide loading on popstate (back/forward button)
+        window.addEventListener('popstate', function () {
+            hideLoading();
+            sessionStorage.removeItem('isForwardNavigation');
         });
     </script>
 </body>

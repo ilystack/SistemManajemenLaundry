@@ -214,16 +214,48 @@
             }
         }
 
+        function hideLoading() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) {
+                overlay.classList.remove('show');
+            }
+        }
+
+        // Hide loading immediately if this is a back/forward navigation
+        (function () {
+            const navigationType = performance.getEntriesByType('navigation')[0]?.type;
+            const isForwardNav = sessionStorage.getItem('isForwardNavigation') === 'true';
+
+            if (navigationType === 'back_forward' && !isForwardNav) {
+                hideLoading();
+            }
+
+            sessionStorage.removeItem('isForwardNavigation');
+        })();
+
         document.addEventListener('DOMContentLoaded', function () {
             document.querySelectorAll('.role-card').forEach(card => {
                 card.addEventListener('click', function (e) {
                     e.preventDefault();
+                    sessionStorage.setItem('isForwardNavigation', 'true');
                     showLoading();
                     setTimeout(() => {
                         window.location.href = this.getAttribute('href');
                     }, 100);
                 });
             });
+        });
+
+        window.addEventListener('pageshow', function (event) {
+            if (event.persisted) {
+                hideLoading();
+                sessionStorage.removeItem('isForwardNavigation');
+            }
+        });
+
+        window.addEventListener('popstate', function () {
+            hideLoading();
+            sessionStorage.removeItem('isForwardNavigation');
         });
     </script>
 </body>
