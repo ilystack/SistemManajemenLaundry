@@ -438,32 +438,45 @@
 
                     if (data.success) {
                         if (data.needs_payment && data.snap_token) {
-                            this.showModal = false;
-                            window.snap.pay(data.snap_token, {
-                                onSuccess: (result) => {
-                                    if (typeof window.showToast === 'function') {
-                                        window.showToast('Pembayaran berhasil!', 'success');
+                            // Don't close modal before snap.pay - it causes state error
+                            // Modal will close when Snap opens
+                            try {
+                                window.snap.pay(data.snap_token, {
+                                    onSuccess: (result) => {
+                                        this.showModal = false;
+                                        if (typeof window.showToast === 'function') {
+                                            window.showToast('Pembayaran berhasil!', 'success');
+                                        }
+                                        setTimeout(() => { window.location.href = DASHBOARD_URL; }, 1000);
+                                    },
+                                    onPending: (result) => {
+                                        this.showModal = false;
+                                        if (typeof window.showToast === 'function') {
+                                            window.showToast('Menunggu pembayaran...', 'info');
+                                        }
+                                        setTimeout(() => { window.location.href = DASHBOARD_URL; }, 1000);
+                                    },
+                                    onError: (result) => {
+                                        this.showModal = false;
+                                        if (typeof window.showToast === 'function') {
+                                            window.showToast('Pembayaran gagal. Silakan coba lagi.', 'error');
+                                        } else {
+                                            alert('Pembayaran gagal. Silakan coba lagi.');
+                                        }
+                                    },
+                                    onClose: () => {
+                                        this.showModal = false;
+                                        console.log('Payment popup closed');
+                                        setTimeout(() => { window.location.href = DASHBOARD_URL; }, 500);
                                     }
-                                    setTimeout(() => { window.location.href = DASHBOARD_URL; }, 1000);
-                                },
-                                onPending: (result) => {
-                                    if (typeof window.showToast === 'function') {
-                                        window.showToast('Menunggu pembayaran...', 'info');
-                                    }
-                                    setTimeout(() => { window.location.href = DASHBOARD_URL; }, 1000);
-                                },
-                                onError: (result) => {
-                                    if (typeof window.showToast === 'function') {
-                                        window.showToast('Pembayaran gagal. Silakan coba lagi.', 'error');
-                                    } else {
-                                        alert('Pembayaran gagal. Silakan coba lagi.');
-                                    }
-                                },
-                                onClose: () => {
-                                    console.log('Payment popup closed');
-                                    setTimeout(() => { window.location.href = DASHBOARD_URL; }, 500);
+                                });
+                            } catch (error) {
+                                console.error('Snap error:', error);
+                                if (typeof window.showToast === 'function') {
+                                    window.showToast('Gagal membuka pembayaran. Silakan coba lagi.', 'error');
                                 }
-                            });
+                                this.showModal = false;
+                            }
                         } else {
                             if (typeof window.showToast === 'function') {
                                 window.showToast(data.message, 'success');

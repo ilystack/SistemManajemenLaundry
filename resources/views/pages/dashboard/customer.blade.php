@@ -8,12 +8,7 @@
     <link rel="icon" type="image/png" href="{{ asset('assets/icon.png') }}">
     <title>Dashboard Customer - Almas Laundry</title>
     
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class'
-        }
-    </script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     <script>
         if (localStorage.getItem('darkMode') === 'true') {
