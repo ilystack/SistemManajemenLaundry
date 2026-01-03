@@ -1,3 +1,7 @@
+@php
+    $dashboardUrl = Auth::user()->role === 'customer' ? route('customer.dashboard') : route('order.index');
+@endphp
+
 <form @submit.prevent="submitForm" class="p-6 space-y-5" x-data="{ 
           pickup: 'antar_sendiri',
           paymentMethod: 'cash',
@@ -11,7 +15,7 @@
     return ['id' => $p->id, 'nama' => $p->nama, 'harga' => $p->harga, 'jenis_layanan' => $p->jenis_layanan];
 })) }},
           paketPcsGrouped: {},
-          selectedPcsItems: {}, // { 'Cuci Jas': { jenis: 'cuci_setrika', paket_id: 5, jumlah: 2, harga: 15000 } }
+          selectedPcsItems: {},
           
           laundryLat: {{ $laundryLocation['latitude'] ?? 'null' }},
           laundryLng: {{ $laundryLocation['longitude'] ?? 'null' }},
@@ -32,11 +36,9 @@
           },
           
           needsPayment() {
-              // Antar sendiri + cash = NO payment
               if (this.pickup === 'antar_sendiri' && this.paymentMethod === 'cash') {
                   return false;
               }
-              // All other combinations need payment
               return true;
           },
           
@@ -45,17 +47,14 @@
                   ? (this.jumlahKg * (this.paketKg.find(p => p.id == this.selectedPaketKg)?.harga || 0))
                   : this.getTotalPcsPrice();
               
-              // Antar sendiri + QRIS = Full laundry only
               if (this.pickup === 'antar_sendiri' && this.paymentMethod === 'qris') {
                   return laundryTotal;
               }
               
-              // Dijemput + cash = DP (jarak only)
               if (this.pickup === 'dijemput' && this.paymentMethod === 'cash') {
                   return this.pickupCost;
               }
               
-              // Dijemput + QRIS = Full (laundry + jarak)
               if (this.pickup === 'dijemput' && this.paymentMethod === 'qris') {
                   return laundryTotal + this.pickupCost;
               }
@@ -132,14 +131,14 @@
           },
           
           calculateDistance(lat1, lon1, lat2, lon2) {
-              const R = 6371; // Radius bumi dalam km
+              const R = 6371;
               const dLat = (lat2 - lat1) * Math.PI / 180;
               const dLon = (lon2 - lon1) * Math.PI / 180;
               const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
                         Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
                         Math.sin(dLon/2) * Math.sin(dLon/2);
               const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-              return R * c; // Jarak dalam km
+              return R * c;
           },
           
           detectLocation() {
@@ -163,7 +162,6 @@
                           );
                           
                           this.distance = Math.round(this.distance * 10) / 10;
-                          
                           this.pickupCost = Math.round(this.distance * 1000);
                           
                           document.getElementById('jarak_km').value = this.distance;
@@ -187,7 +185,6 @@
               const form = event.target;
               const formData = new FormData(form);
               
-              // Show loading
               if (typeof window.showLoading === 'function') {
                   window.showLoading();
               }
@@ -196,66 +193,78 @@
                   const response = await fetch('{{ route("order.store") }}', {
                       method: 'POST',
                       headers: {
-                          'X-CSRF-TOKEN': document.querySelector('meta[name=" csrf-token"]').content, 'Accept'
-    : 'application/json' , 'X-Requested-With' : 'XMLHttpRequest' }, body: formData }); const data=await response.json();
-    if (typeof window.hideLoading==='function' ) { window.hideLoading(); } if (data.success) { if (data.needs_payment &&
-    data.snap_token) { // Close order modal this.showModal=false; // Open Midtrans Snap modal
-    window.snap.pay(data.snap_token, { onSuccess: (result)=> {
-    if (typeof window.showToast === 'function') {
-    window.showToast('Pembayaran berhasil!', 'success');
-    }
-    setTimeout(() => {
-    window.location.href = '{{ Auth::user()->role === "customer" ? route("customer.dashboard") : route("order.index") }}';
-    }, 1000);
-    },
-    onPending: (result) => {
-    if (typeof window.showToast === 'function') {
-    window.showToast('Menunggu pembayaran...', 'info');
-    }
-    setTimeout(() => {
-    window.location.href = '{{ Auth::user()->role === "customer" ? route("customer.dashboard") : route("order.index") }}';
-    }, 1000);
-    },
-    onError: (result) => {
-    if (typeof window.showToast === 'function') {
-    window.showToast('Pembayaran gagal. Silakan coba lagi.', 'error');
-    } else {
-    alert('Pembayaran gagal. Silakan coba lagi.');
-    }
-    },
-    onClose: () => {
-    console.log('Payment popup closed');
-    // User closed the popup, redirect to dashboard
-    setTimeout(() => {
-    window.location.href = '{{ Auth::user()->role === "customer" ? route("customer.dashboard") : route("order.index") }}';
-    }, 500);
-    }
-    });
-    } else {
-    // No payment needed, redirect
-    if (typeof window.showToast === 'function') {
-    window.showToast(data.message, 'success');
-    }
-    setTimeout(() => {
-    window.location.href = data.redirect_url;
-    }, 1000);
-    }
-    } else {
-    throw new Error(data.message || 'Terjadi kesalahan');
-    }
-    } catch (error) {
-    if (typeof window.hideLoading === 'function') {
-    window.hideLoading();
-    }
-
-    if (typeof window.showToast === 'function') {
-    window.showToast(error.message || 'Terjadi kesalahan saat membuat order', 'error');
-    } else {
-    alert(error.message || 'Terjadi kesalahan saat membuat order');
-    }
-    }
-    }
-    }">
+                          'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                          'Accept': 'application/json',
+                          'X-Requested-With': 'XMLHttpRequest'
+                      },
+                      body: formData
+                  });
+                  
+                  const data = await response.json();
+                  
+                  if (typeof window.hideLoading === 'function') {
+                      window.hideLoading();
+                  }
+                  
+                  if (data.success) {
+                      if (data.needs_payment && data.snap_token) {
+                          this.showModal = false;
+                          
+                          window.snap.pay(data.snap_token, {
+                              onSuccess: (result) => {
+                                  if (typeof window.showToast === 'function') {
+                                      window.showToast('Pembayaran berhasil!', 'success');
+                                  }
+                                  setTimeout(() => {
+                                      window.location.href = '{{ $dashboardUrl }}';
+                                  }, 1000);
+                              },
+                              onPending: (result) => {
+                                  if (typeof window.showToast === 'function') {
+                                      window.showToast('Menunggu pembayaran...', 'info');
+                                  }
+                                  setTimeout(() => {
+                                      window.location.href = '{{ $dashboardUrl }}';
+                                  }, 1000);
+                              },
+                              onError: (result) => {
+                                  if (typeof window.showToast === 'function') {
+                                      window.showToast('Pembayaran gagal. Silakan coba lagi.', 'error');
+                                  } else {
+                                      alert('Pembayaran gagal. Silakan coba lagi.');
+                                  }
+                              },
+                              onClose: () => {
+                                  console.log('Payment popup closed');
+                                  setTimeout(() => {
+                                      window.location.href = '{{ $dashboardUrl }}';
+                                  }, 500);
+                              }
+                          });
+                      } else {
+                          if (typeof window.showToast === 'function') {
+                              window.showToast(data.message, 'success');
+                          }
+                          setTimeout(() => {
+                              window.location.href = data.redirect_url;
+                          }, 1000);
+                      }
+                  } else {
+                      throw new Error(data.message || 'Terjadi kesalahan');
+                  }
+              } catch (error) {
+                  if (typeof window.hideLoading === 'function') {
+                      window.hideLoading();
+                  }
+                  
+                  if (typeof window.showToast === 'function') {
+                      window.showToast(error.message || 'Terjadi kesalahan saat membuat order', 'error');
+                  } else {
+                      alert(error.message || 'Terjadi kesalahan saat membuat order');
+                  }
+              }
+          }
+      }">
     @csrf
 
     <div>
@@ -485,8 +494,7 @@
         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Metode Pembayaran</label>
         <div class="grid grid-cols-2 gap-4">
             <label class="cursor-pointer">
-                <input type="radio" name="payment_method" value="cash" x-model="paymentMethod" class="peer sr-only"
-                    checked>
+                <input type="radio" name="payment_method" value="cash" x-model="paymentMethod" class="peer sr-only" checked>
                 <div
                     class="p-4 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 hover:bg-white dark:hover:bg-gray-600 peer-checked:border-green-500 peer-checked:bg-green-50 dark:peer-checked:bg-green-900/30 peer-checked:text-green-700 dark:peer-checked:text-green-400 transition-all text-center">
                     <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
