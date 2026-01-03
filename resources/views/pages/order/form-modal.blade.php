@@ -6,7 +6,7 @@
           pickup: 'antar_sendiri',
           paymentMethod: 'cash',
           tipeOrder: null,
-          selectedPaketKg: null,
+          selectedPaketKg: '',
           jumlahKg: 0,
           paketKg: {{ json_encode($pakets->where('satuan', 'kg')->values()->map(function ($p) {
     return ['id' => $p->id, 'nama' => $p->nama, 'harga' => $p->harga];
@@ -193,7 +193,7 @@
                   const response = await fetch('{{ route("order.store") }}', {
                       method: 'POST',
                       headers: {
-                          'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                           'Accept': 'application/json',
                           'X-Requested-With': 'XMLHttpRequest'
                       },
