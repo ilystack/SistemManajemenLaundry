@@ -1,5 +1,4 @@
 <script>
-    // Dashboard URL untuk redirect setelah payment
     const DASHBOARD_URL = '{{ Auth::user()->role === "customer" ? route("customer.dashboard") : route("order.index") }}';
     const ORDER_STORE_URL = '{{ route("order.store") }}';
 </script>
