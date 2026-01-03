@@ -207,9 +207,24 @@
     </div>
 
     <script>
+        (function () {
+            const overlay = document.getElementById('loadingOverlay');
+            const navigationType = performance.getEntriesByType('navigation')[0]?.type;
+            const isForwardNav = sessionStorage.getItem('isForwardNavigation') === 'true';
+
+            if (navigationType === 'back_forward' && !isForwardNav) {
+                if (overlay) {
+                    overlay.classList.remove('show');
+                    overlay.style.display = 'none';
+                }
+            }
+            sessionStorage.removeItem('isForwardNavigation');
+        })();
+
         function showLoading() {
             const overlay = document.getElementById('loadingOverlay');
             if (overlay) {
+                overlay.style.display = '';
                 overlay.classList.add('show');
             }
         }

@@ -944,14 +944,25 @@
     </div>
 
     <script>
-        // ==================== LOADING HELPER FUNCTIONS ====================
+        (function () {
+            const overlay = document.getElementById('loadingOverlay');
+            const navigationType = performance.getEntriesByType('navigation')[0]?.type;
+            const isForwardNav = sessionStorage.getItem('isForwardNavigation') === 'true';
 
-        /**
-         * Show loading overlay
-         */
+            if (navigationType === 'back_forward' && !isForwardNav) {
+                if (overlay) {
+                    overlay.classList.remove('show');
+                    overlay.style.display = 'none';
+                }
+            }
+
+            sessionStorage.removeItem('isForwardNavigation');
+        })();
+
         window.showLoading = function () {
             const overlay = document.getElementById('loadingOverlay');
             if (overlay) {
+                overlay.style.display = '';
                 overlay.classList.add('show');
             }
         };
@@ -979,19 +990,7 @@
             }, 100);
         };
 
-        // Hide loading immediately if this is a back/forward navigation
-        (function () {
-            const navigationType = performance.getEntriesByType('navigation')[0]?.type;
-            const isForwardNav = sessionStorage.getItem('isForwardNavigation') === 'true';
 
-            // If it's back_forward navigation and NOT a forward nav we initiated, hide loading
-            if (navigationType === 'back_forward' && !isForwardNav) {
-                hideLoading();
-            }
-
-            // Clear the flag after checking
-            sessionStorage.removeItem('isForwardNavigation');
-        })();
 
         // Auto-detect and add loading to all forms
         document.addEventListener('DOMContentLoaded', function () {
@@ -1034,8 +1033,10 @@
 
         // Handle browser back/forward button and page restore from cache
         window.addEventListener('pageshow', function (event) {
-            // If page is restored from cache (bfcache)
-            if (event.persisted) {
+            const navigationType = performance.getEntriesByType('navigation')[0]?.type;
+            const isForwardNav = sessionStorage.getItem('isForwardNavigation') === 'true';
+
+            if (event.persisted || (navigationType === 'back_forward' && !isForwardNav)) {
                 hideLoading();
                 sessionStorage.removeItem('isForwardNavigation');
             }
