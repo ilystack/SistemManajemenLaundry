@@ -1,270 +1,10 @@
-@php
-    $dashboardUrl = Auth::user()->role === 'customer' ? route('customer.dashboard') : route('order.index');
-@endphp
+<script>
+    // Dashboard URL untuk redirect setelah payment
+    const DASHBOARD_URL = '{{ Auth::user()->role === "customer" ? route("customer.dashboard") : route("order.index") }}';
+    const ORDER_STORE_URL = '{{ route("order.store") }}';
+</script>
 
-<form @submit.prevent="submitForm" class="p-6 space-y-5" x-data="{ 
-          pickup: 'antar_sendiri',
-          paymentMethod: 'cash',
-          tipeOrder: null,
-          selectedPaketKg: '',
-          jumlahKg: 0,
-          paketKg: {{ json_encode($pakets->where('satuan', 'kg')->values()->map(function ($p) {
-    return ['id' => $p->id, 'nama' => $p->nama, 'harga' => $p->harga];
-})) }},
-          paketPcsRaw: {{ json_encode($pakets->where('satuan', 'pcs')->values()->map(function ($p) {
-    return ['id' => $p->id, 'nama' => $p->nama, 'harga' => $p->harga, 'jenis_layanan' => $p->jenis_layanan];
-})) }},
-          paketPcsGrouped: {},
-          selectedPcsItems: {},
-          
-          laundryLat: {{ $laundryLocation['latitude'] ?? 'null' }},
-          laundryLng: {{ $laundryLocation['longitude'] ?? 'null' }},
-          customerLat: null,
-          customerLng: null,
-          distance: 0,
-          pickupCost: 0,
-          gettingLocation: false,
-          locationDetected: false,
-          
-          init() {
-              this.paketPcsRaw.forEach(p => {
-                  if (!this.paketPcsGrouped[p.nama]) {
-                      this.paketPcsGrouped[p.nama] = [];
-                  }
-                  this.paketPcsGrouped[p.nama].push(p);
-              });
-          },
-          
-          needsPayment() {
-              if (this.pickup === 'antar_sendiri' && this.paymentMethod === 'cash') {
-                  return false;
-              }
-              return true;
-          },
-          
-          getPaymentAmount() {
-              const laundryTotal = this.tipeOrder === 'kg' 
-                  ? (this.jumlahKg * (this.paketKg.find(p => p.id == this.selectedPaketKg)?.harga || 0))
-                  : this.getTotalPcsPrice();
-              
-              if (this.pickup === 'antar_sendiri' && this.paymentMethod === 'qris') {
-                  return laundryTotal;
-              }
-              
-              if (this.pickup === 'dijemput' && this.paymentMethod === 'cash') {
-                  return this.pickupCost;
-              }
-              
-              if (this.pickup === 'dijemput' && this.paymentMethod === 'qris') {
-                  return laundryTotal + this.pickupCost;
-              }
-              
-              return 0;
-          },
-          
-          getSubmitButtonText() {
-              if (!this.needsPayment()) {
-                  return 'Buat Order';
-              }
-              
-              const amount = this.getPaymentAmount();
-              
-              if (this.pickup === 'dijemput' && this.paymentMethod === 'cash') {
-                  return `Bayar DP Rp ${amount.toLocaleString('id-ID')}`;
-              }
-              
-              return `Bayar Rp ${amount.toLocaleString('id-ID')}`;
-          },
-          
-          addPcsItem(namaPaket) {
-              if (!this.selectedPcsItems[namaPaket]) {
-                  const defaultJenis = this.paketPcsGrouped[namaPaket].find(p => p.jenis_layanan === 'cuci_setrika');
-                  this.selectedPcsItems[namaPaket] = {
-                      jenis: defaultJenis ? defaultJenis.jenis_layanan : this.paketPcsGrouped[namaPaket][0].jenis_layanan,
-                      paket_id: defaultJenis ? defaultJenis.id : this.paketPcsGrouped[namaPaket][0].id,
-                      jumlah: 1,
-                      harga: defaultJenis ? defaultJenis.harga : this.paketPcsGrouped[namaPaket][0].harga
-                  };
-              }
-          },
-          
-          updateJenis(namaPaket, jenis) {
-              const paket = this.paketPcsGrouped[namaPaket].find(p => p.jenis_layanan === jenis);
-              if (paket && this.selectedPcsItems[namaPaket]) {
-                  this.selectedPcsItems[namaPaket].jenis = jenis;
-                  this.selectedPcsItems[namaPaket].paket_id = paket.id;
-                  this.selectedPcsItems[namaPaket].harga = paket.harga;
-              }
-          },
-          
-          incrementPcs(namaPaket) {
-              if (this.selectedPcsItems[namaPaket]) {
-                  this.selectedPcsItems[namaPaket].jumlah++;
-              }
-          },
-          
-          decrementPcs(namaPaket) {
-              if (this.selectedPcsItems[namaPaket] && this.selectedPcsItems[namaPaket].jumlah > 1) {
-                  this.selectedPcsItems[namaPaket].jumlah--;
-              }
-          },
-          
-          removePcsItem(namaPaket) {
-              delete this.selectedPcsItems[namaPaket];
-          },
-          
-          getTotalPcsItems() {
-              return Object.values(this.selectedPcsItems).reduce((sum, item) => sum + item.jumlah, 0);
-          },
-          
-          getTotalPcsPrice() {
-              return Object.values(this.selectedPcsItems).reduce((sum, item) => sum + (item.jumlah * item.harga), 0);
-          },
-          
-          getJenisLabel(jenis) {
-              const labels = {
-                  'cuci_saja': '🧼 Cuci Saja',
-                  'cuci_setrika': '✨ Cuci + Setrika',
-                  'kilat': '⚡ Kilat'
-              };
-              return labels[jenis] || jenis;
-          },
-          
-          calculateDistance(lat1, lon1, lat2, lon2) {
-              const R = 6371;
-              const dLat = (lat2 - lat1) * Math.PI / 180;
-              const dLon = (lon2 - lon1) * Math.PI / 180;
-              const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                        Math.sin(dLon/2) * Math.sin(dLon/2);
-              const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-              return R * c;
-          },
-          
-          detectLocation() {
-              if (!this.laundryLat || !this.laundryLng) {
-                  alert('Lokasi laundry belum diset oleh admin. Silakan hubungi admin.');
-                  return;
-              }
-              
-              if (navigator.geolocation) {
-                  this.gettingLocation = true;
-                  navigator.geolocation.getCurrentPosition(
-                      (position) => {
-                          this.customerLat = position.coords.latitude;
-                          this.customerLng = position.coords.longitude;
-                          
-                          this.distance = this.calculateDistance(
-                              this.laundryLat, 
-                              this.laundryLng,
-                              this.customerLat,
-                              this.customerLng
-                          );
-                          
-                          this.distance = Math.round(this.distance * 10) / 10;
-                          this.pickupCost = Math.round(this.distance * 1000);
-                          
-                          document.getElementById('jarak_km').value = this.distance;
-                          document.getElementById('latitude').value = this.customerLat;
-                          document.getElementById('longitude').value = this.customerLng;
-                          
-                          this.gettingLocation = false;
-                          this.locationDetected = true;
-                      },
-                      (error) => {
-                          alert('Gagal mendapatkan lokasi: ' + error.message);
-                          this.gettingLocation = false;
-                      }
-                  );
-              } else {
-                  alert('Browser Anda tidak mendukung Geolocation');
-              }
-          },
-          
-          async submitForm(event) {
-              const form = event.target;
-              const formData = new FormData(form);
-              
-              if (typeof window.showLoading === 'function') {
-                  window.showLoading();
-              }
-              
-              try {
-                  const response = await fetch('{{ route("order.store") }}', {
-                      method: 'POST',
-                      headers: {
-                          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                          'Accept': 'application/json',
-                          'X-Requested-With': 'XMLHttpRequest'
-                      },
-                      body: formData
-                  });
-                  
-                  const data = await response.json();
-                  
-                  if (typeof window.hideLoading === 'function') {
-                      window.hideLoading();
-                  }
-                  
-                  if (data.success) {
-                      if (data.needs_payment && data.snap_token) {
-                          this.showModal = false;
-                          
-                          window.snap.pay(data.snap_token, {
-                              onSuccess: (result) => {
-                                  if (typeof window.showToast === 'function') {
-                                      window.showToast('Pembayaran berhasil!', 'success');
-                                  }
-                                  setTimeout(() => {
-                                      window.location.href = '{{ $dashboardUrl }}';
-                                  }, 1000);
-                              },
-                              onPending: (result) => {
-                                  if (typeof window.showToast === 'function') {
-                                      window.showToast('Menunggu pembayaran...', 'info');
-                                  }
-                                  setTimeout(() => {
-                                      window.location.href = '{{ $dashboardUrl }}';
-                                  }, 1000);
-                              },
-                              onError: (result) => {
-                                  if (typeof window.showToast === 'function') {
-                                      window.showToast('Pembayaran gagal. Silakan coba lagi.', 'error');
-                                  } else {
-                                      alert('Pembayaran gagal. Silakan coba lagi.');
-                                  }
-                              },
-                              onClose: () => {
-                                  console.log('Payment popup closed');
-                                  setTimeout(() => {
-                                      window.location.href = '{{ $dashboardUrl }}';
-                                  }, 500);
-                              }
-                          });
-                      } else {
-                          if (typeof window.showToast === 'function') {
-                              window.showToast(data.message, 'success');
-                          }
-                          setTimeout(() => {
-                              window.location.href = data.redirect_url;
-                          }, 1000);
-                      }
-                  } else {
-                      throw new Error(data.message || 'Terjadi kesalahan');
-                  }
-              } catch (error) {
-                  if (typeof window.hideLoading === 'function') {
-                      window.hideLoading();
-                  }
-                  
-                  if (typeof window.showToast === 'function') {
-                      window.showToast(error.message || 'Terjadi kesalahan saat membuat order', 'error');
-                  } else {
-                      alert(error.message || 'Terjadi kesalahan saat membuat order');
-                  }
-              }
-          }
-      }">
+<form @submit.prevent="submitForm" class="p-6 space-y-5" x-data="orderFormData()">
     @csrf
 
     <div>
@@ -324,7 +64,6 @@
         <div>
             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Pilih Paket & Jenis
                 Layanan</label>
-
             <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 space-y-3 max-h-96 overflow-y-auto">
                 <template x-for="(jenisArray, namaPaket) in paketPcsGrouped" :key="namaPaket">
                     <div class="bg-white dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
@@ -334,9 +73,8 @@
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Pilih jenis layanan</p>
                             </div>
                             <button type="button" @click="addPcsItem(namaPaket)" x-show="!selectedPcsItems[namaPaket]"
-                                class="px-3 py-1.5 bg-purple-500 hover:bg-purple-600 text-white text-sm font-semibold rounded-lg transition">
-                                + Tambah
-                            </button>
+                                class="px-3 py-1.5 bg-purple-500 hover:bg-purple-600 text-white text-sm font-semibold rounded-lg transition">+
+                                Tambah</button>
                         </div>
 
                         <div x-show="selectedPcsItems[namaPaket]" x-transition
@@ -359,15 +97,11 @@
                                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Jumlah:</span>
                                 <div class="flex items-center gap-3">
                                     <button type="button" @click="decrementPcs(namaPaket)"
-                                        class="w-8 h-8 rounded-lg bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-700 dark:text-white font-bold transition flex items-center justify-center">
-                                        −
-                                    </button>
+                                        class="w-8 h-8 rounded-lg bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-700 dark:text-white font-bold transition flex items-center justify-center">−</button>
                                     <span class="w-8 text-center font-bold text-gray-900 dark:text-white"
                                         x-text="selectedPcsItems[namaPaket]?.jumlah || 0"></span>
                                     <button type="button" @click="incrementPcs(namaPaket)"
-                                        class="w-8 h-8 rounded-lg bg-purple-500 hover:bg-purple-600 text-white font-bold transition flex items-center justify-center">
-                                        +
-                                    </button>
+                                        class="w-8 h-8 rounded-lg bg-purple-500 hover:bg-purple-600 text-white font-bold transition flex items-center justify-center">+</button>
                                 </div>
                             </div>
 
@@ -380,9 +114,7 @@
                                     </p>
                                 </div>
                                 <button type="button" @click="removePcsItem(namaPaket)"
-                                    class="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-sm font-medium transition">
-                                    Hapus
-                                </button>
+                                    class="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-sm font-medium transition">Hapus</button>
                             </div>
                         </div>
                     </div>
@@ -472,14 +204,11 @@
                 <div class="flex-1">
                     <p class="text-sm font-semibold text-green-900 dark:text-green-300">Lokasi Terdeteksi!</p>
                     <div class="mt-2 space-y-1">
-                        <p class="text-sm text-green-800 dark:text-green-400">
-                            <span class="font-medium">Jarak:</span>
-                            <span class="font-bold" x-text="`${distance} km`"></span>
-                        </p>
-                        <p class="text-sm text-green-800 dark:text-green-400">
-                            <span class="font-medium">Biaya Pickup:</span>
-                            <span class="font-bold" x-text="`Rp ${pickupCost.toLocaleString('id-ID')}`"></span>
-                        </p>
+                        <p class="text-sm text-green-800 dark:text-green-400"><span class="font-medium">Jarak:</span>
+                            <span class="font-bold" x-text="`${distance} km`"></span></p>
+                        <p class="text-sm text-green-800 dark:text-green-400"><span class="font-medium">Biaya
+                                Pickup:</span> <span class="font-bold"
+                                x-text="`Rp ${pickupCost.toLocaleString('id-ID')}`"></span></p>
                     </div>
                 </div>
             </div>
@@ -494,7 +223,8 @@
         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Metode Pembayaran</label>
         <div class="grid grid-cols-2 gap-4">
             <label class="cursor-pointer">
-                <input type="radio" name="payment_method" value="cash" x-model="paymentMethod" class="peer sr-only" checked>
+                <input type="radio" name="payment_method" value="cash" x-model="paymentMethod" class="peer sr-only"
+                    checked>
                 <div
                     class="p-4 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 hover:bg-white dark:hover:bg-gray-600 peer-checked:border-green-500 peer-checked:bg-green-50 dark:peer-checked:bg-green-900/30 peer-checked:text-green-700 dark:peer-checked:text-green-400 transition-all text-center">
                     <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -522,14 +252,237 @@
 
     <div class="mt-6 flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
         <button type="button" @click="showModal = false"
-            class="px-5 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition">
-            Batal
-        </button>
+            class="px-5 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition">Batal</button>
         <button type="submit"
             :disabled="!tipeOrder || (tipeOrder === 'kg' && (!selectedPaketKg || jumlahKg <= 0)) || (tipeOrder === 'pcs' && getTotalPcsItems() === 0) || (pickup === 'dijemput' && !locationDetected)"
             :class="(!tipeOrder || (tipeOrder === 'kg' && (!selectedPaketKg || jumlahKg <= 0)) || (tipeOrder === 'pcs' && getTotalPcsItems() === 0) || (pickup === 'dijemput' && !locationDetected)) ? 'opacity-50 cursor-not-allowed' : ''"
             class="px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-cyan-600 rounded-lg hover:from-blue-700 hover:to-cyan-700 shadow-md hover:shadow-lg transition"
-            x-text="getSubmitButtonText()">
-        </button>
+            x-text="getSubmitButtonText()"></button>
     </div>
 </form>
+
+<script>
+    function orderFormData() {
+        return {
+            pickup: 'antar_sendiri',
+            paymentMethod: 'cash',
+            tipeOrder: null,
+            selectedPaketKg: '',
+            jumlahKg: 0,
+            paketKg: {!! json_encode($pakets->where('satuan', 'kg')->values()->map(function ($p) {
+    return ['id' => $p->id, 'nama' => $p->nama, 'harga' => $p->harga];
+})) !!},
+            paketPcsRaw: {!! json_encode($pakets->where('satuan', 'pcs')->values()->map(function ($p) {
+    return ['id' => $p->id, 'nama' => $p->nama, 'harga' => $p->harga, 'jenis_layanan' => $p->jenis_layanan];
+})) !!},
+            paketPcsGrouped: {},
+            selectedPcsItems: {},
+            laundryLat: {{ $laundryLocation['latitude'] ?? 'null' }},
+            laundryLng: {{ $laundryLocation['longitude'] ?? 'null' }},
+            customerLat: null,
+            customerLng: null,
+            distance: 0,
+            pickupCost: 0,
+            gettingLocation: false,
+            locationDetected: false,
+
+            init() {
+                this.paketPcsRaw.forEach(p => {
+                    if (!this.paketPcsGrouped[p.nama]) {
+                        this.paketPcsGrouped[p.nama] = [];
+                    }
+                    this.paketPcsGrouped[p.nama].push(p);
+                });
+            },
+
+            needsPayment() {
+                return !(this.pickup === 'antar_sendiri' && this.paymentMethod === 'cash');
+            },
+
+            getPaymentAmount() {
+                const laundryTotal = this.tipeOrder === 'kg'
+                    ? (this.jumlahKg * (this.paketKg.find(p => p.id == this.selectedPaketKg)?.harga || 0))
+                    : this.getTotalPcsPrice();
+
+                if (this.pickup === 'antar_sendiri' && this.paymentMethod === 'qris') return laundryTotal;
+                if (this.pickup === 'dijemput' && this.paymentMethod === 'cash') return this.pickupCost;
+                if (this.pickup === 'dijemput' && this.paymentMethod === 'qris') return laundryTotal + this.pickupCost;
+                return 0;
+            },
+
+            getSubmitButtonText() {
+                if (!this.needsPayment()) return 'Buat Order';
+                const amount = this.getPaymentAmount();
+                if (this.pickup === 'dijemput' && this.paymentMethod === 'cash') {
+                    return `Bayar DP Rp ${amount.toLocaleString('id-ID')}`;
+                }
+                return `Bayar Rp ${amount.toLocaleString('id-ID')}`;
+            },
+
+            addPcsItem(namaPaket) {
+                if (!this.selectedPcsItems[namaPaket]) {
+                    const defaultJenis = this.paketPcsGrouped[namaPaket].find(p => p.jenis_layanan === 'cuci_setrika');
+                    this.selectedPcsItems[namaPaket] = {
+                        jenis: defaultJenis ? defaultJenis.jenis_layanan : this.paketPcsGrouped[namaPaket][0].jenis_layanan,
+                        paket_id: defaultJenis ? defaultJenis.id : this.paketPcsGrouped[namaPaket][0].id,
+                        jumlah: 1,
+                        harga: defaultJenis ? defaultJenis.harga : this.paketPcsGrouped[namaPaket][0].harga
+                    };
+                }
+            },
+
+            updateJenis(namaPaket, jenis) {
+                const paket = this.paketPcsGrouped[namaPaket].find(p => p.jenis_layanan === jenis);
+                if (paket && this.selectedPcsItems[namaPaket]) {
+                    this.selectedPcsItems[namaPaket].jenis = jenis;
+                    this.selectedPcsItems[namaPaket].paket_id = paket.id;
+                    this.selectedPcsItems[namaPaket].harga = paket.harga;
+                }
+            },
+
+            incrementPcs(namaPaket) {
+                if (this.selectedPcsItems[namaPaket]) {
+                    this.selectedPcsItems[namaPaket].jumlah++;
+                }
+            },
+
+            decrementPcs(namaPaket) {
+                if (this.selectedPcsItems[namaPaket] && this.selectedPcsItems[namaPaket].jumlah > 1) {
+                    this.selectedPcsItems[namaPaket].jumlah--;
+                }
+            },
+
+            removePcsItem(namaPaket) {
+                delete this.selectedPcsItems[namaPaket];
+            },
+
+            getTotalPcsItems() {
+                return Object.values(this.selectedPcsItems).reduce((sum, item) => sum + item.jumlah, 0);
+            },
+
+            getTotalPcsPrice() {
+                return Object.values(this.selectedPcsItems).reduce((sum, item) => sum + (item.jumlah * item.harga), 0);
+            },
+
+            getJenisLabel(jenis) {
+                const labels = {
+                    'cuci_saja': '🧼 Cuci Saja',
+                    'cuci_setrika': '✨ Cuci + Setrika',
+                    'kilat': '⚡ Kilat'
+                };
+                return labels[jenis] || jenis;
+            },
+
+            calculateDistance(lat1, lon1, lat2, lon2) {
+                const R = 6371;
+                const dLat = (lat2 - lat1) * Math.PI / 180;
+                const dLon = (lon2 - lon1) * Math.PI / 180;
+                const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                return R * c;
+            },
+
+            detectLocation() {
+                if (!this.laundryLat || !this.laundryLng) {
+                    alert('Lokasi laundry belum diset oleh admin. Silakan hubungi admin.');
+                    return;
+                }
+
+                if (navigator.geolocation) {
+                    this.gettingLocation = true;
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            this.customerLat = position.coords.latitude;
+                            this.customerLng = position.coords.longitude;
+                            this.distance = this.calculateDistance(this.laundryLat, this.laundryLng, this.customerLat, this.customerLng);
+                            this.distance = Math.round(this.distance * 10) / 10;
+                            this.pickupCost = Math.round(this.distance * 1000);
+
+                            document.getElementById('jarak_km').value = this.distance;
+                            document.getElementById('latitude').value = this.customerLat;
+                            document.getElementById('longitude').value = this.customerLng;
+
+                            this.gettingLocation = false;
+                            this.locationDetected = true;
+                        },
+                        (error) => {
+                            alert('Gagal mendapatkan lokasi: ' + error.message);
+                            this.gettingLocation = false;
+                        }
+                    );
+                } else {
+                    alert('Browser Anda tidak mendukung Geolocation');
+                }
+            },
+
+            async submitForm(event) {
+                const form = event.target;
+                const formData = new FormData(form);
+
+                if (typeof window.showLoading === 'function') window.showLoading();
+
+                try {
+                    const response = await fetch(ORDER_STORE_URL, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: formData
+                    });
+
+                    const data = await response.json();
+                    if (typeof window.hideLoading === 'function') window.hideLoading();
+
+                    if (data.success) {
+                        if (data.needs_payment && data.snap_token) {
+                            this.showModal = false;
+                            window.snap.pay(data.snap_token, {
+                                onSuccess: (result) => {
+                                    if (typeof window.showToast === 'function') {
+                                        window.showToast('Pembayaran berhasil!', 'success');
+                                    }
+                                    setTimeout(() => { window.location.href = DASHBOARD_URL; }, 1000);
+                                },
+                                onPending: (result) => {
+                                    if (typeof window.showToast === 'function') {
+                                        window.showToast('Menunggu pembayaran...', 'info');
+                                    }
+                                    setTimeout(() => { window.location.href = DASHBOARD_URL; }, 1000);
+                                },
+                                onError: (result) => {
+                                    if (typeof window.showToast === 'function') {
+                                        window.showToast('Pembayaran gagal. Silakan coba lagi.', 'error');
+                                    } else {
+                                        alert('Pembayaran gagal. Silakan coba lagi.');
+                                    }
+                                },
+                                onClose: () => {
+                                    console.log('Payment popup closed');
+                                    setTimeout(() => { window.location.href = DASHBOARD_URL; }, 500);
+                                }
+                            });
+                        } else {
+                            if (typeof window.showToast === 'function') {
+                                window.showToast(data.message, 'success');
+                            }
+                            setTimeout(() => { window.location.href = data.redirect_url; }, 1000);
+                        }
+                    } else {
+                        throw new Error(data.message || 'Terjadi kesalahan');
+                    }
+                } catch (error) {
+                    if (typeof window.hideLoading === 'function') window.hideLoading();
+                    if (typeof window.showToast === 'function') {
+                        window.showToast(error.message || 'Terjadi kesalahan saat membuat order', 'error');
+                    } else {
+                        alert(error.message || 'Terjadi kesalahan saat membuat order');
+                    }
+                }
+            }
+        };
+    }
+</script>
