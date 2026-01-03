@@ -1,5 +1,6 @@
-<form action="{{ route('order.store') }}" method="POST" class="p-6 space-y-5" x-data="{ 
+<form @submit.prevent="submitForm" class="p-6 space-y-5" x-data="{ 
           pickup: 'antar_sendiri',
+          paymentMethod: 'cash',
           tipeOrder: null,
           selectedPaketKg: null,
           jumlahKg: 0,
@@ -28,6 +29,52 @@
                   }
                   this.paketPcsGrouped[p.nama].push(p);
               });
+          },
+          
+          needsPayment() {
+              // Antar sendiri + cash = NO payment
+              if (this.pickup === 'antar_sendiri' && this.paymentMethod === 'cash') {
+                  return false;
+              }
+              // All other combinations need payment
+              return true;
+          },
+          
+          getPaymentAmount() {
+              const laundryTotal = this.tipeOrder === 'kg' 
+                  ? (this.jumlahKg * (this.paketKg.find(p => p.id == this.selectedPaketKg)?.harga || 0))
+                  : this.getTotalPcsPrice();
+              
+              // Antar sendiri + QRIS = Full laundry only
+              if (this.pickup === 'antar_sendiri' && this.paymentMethod === 'qris') {
+                  return laundryTotal;
+              }
+              
+              // Dijemput + cash = DP (jarak only)
+              if (this.pickup === 'dijemput' && this.paymentMethod === 'cash') {
+                  return this.pickupCost;
+              }
+              
+              // Dijemput + QRIS = Full (laundry + jarak)
+              if (this.pickup === 'dijemput' && this.paymentMethod === 'qris') {
+                  return laundryTotal + this.pickupCost;
+              }
+              
+              return 0;
+          },
+          
+          getSubmitButtonText() {
+              if (!this.needsPayment()) {
+                  return 'Buat Order';
+              }
+              
+              const amount = this.getPaymentAmount();
+              
+              if (this.pickup === 'dijemput' && this.paymentMethod === 'cash') {
+                  return `Bayar DP Rp ${amount.toLocaleString('id-ID')}`;
+              }
+              
+              return `Bayar Rp ${amount.toLocaleString('id-ID')}`;
           },
           
           addPcsItem(namaPaket) {
@@ -134,8 +181,81 @@
               } else {
                   alert('Browser Anda tidak mendukung Geolocation');
               }
-          }
-      }">
+          },
+          
+          async submitForm(event) {
+              const form = event.target;
+              const formData = new FormData(form);
+              
+              // Show loading
+              if (typeof window.showLoading === 'function') {
+                  window.showLoading();
+              }
+              
+              try {
+                  const response = await fetch('{{ route("order.store") }}', {
+                      method: 'POST',
+                      headers: {
+                          'X-CSRF-TOKEN': document.querySelector('meta[name=" csrf-token"]').content, 'Accept'
+    : 'application/json' , 'X-Requested-With' : 'XMLHttpRequest' }, body: formData }); const data=await response.json();
+    if (typeof window.hideLoading==='function' ) { window.hideLoading(); } if (data.success) { if (data.needs_payment &&
+    data.snap_token) { // Close order modal this.showModal=false; // Open Midtrans Snap modal
+    window.snap.pay(data.snap_token, { onSuccess: (result)=> {
+    if (typeof window.showToast === 'function') {
+    window.showToast('Pembayaran berhasil!', 'success');
+    }
+    setTimeout(() => {
+    window.location.href = '{{ Auth::user()->role === "customer" ? route("customer.dashboard") : route("order.index") }}';
+    }, 1000);
+    },
+    onPending: (result) => {
+    if (typeof window.showToast === 'function') {
+    window.showToast('Menunggu pembayaran...', 'info');
+    }
+    setTimeout(() => {
+    window.location.href = '{{ Auth::user()->role === "customer" ? route("customer.dashboard") : route("order.index") }}';
+    }, 1000);
+    },
+    onError: (result) => {
+    if (typeof window.showToast === 'function') {
+    window.showToast('Pembayaran gagal. Silakan coba lagi.', 'error');
+    } else {
+    alert('Pembayaran gagal. Silakan coba lagi.');
+    }
+    },
+    onClose: () => {
+    console.log('Payment popup closed');
+    // User closed the popup, redirect to dashboard
+    setTimeout(() => {
+    window.location.href = '{{ Auth::user()->role === "customer" ? route("customer.dashboard") : route("order.index") }}';
+    }, 500);
+    }
+    });
+    } else {
+    // No payment needed, redirect
+    if (typeof window.showToast === 'function') {
+    window.showToast(data.message, 'success');
+    }
+    setTimeout(() => {
+    window.location.href = data.redirect_url;
+    }, 1000);
+    }
+    } else {
+    throw new Error(data.message || 'Terjadi kesalahan');
+    }
+    } catch (error) {
+    if (typeof window.hideLoading === 'function') {
+    window.hideLoading();
+    }
+
+    if (typeof window.showToast === 'function') {
+    window.showToast(error.message || 'Terjadi kesalahan saat membuat order', 'error');
+    } else {
+    alert(error.message || 'Terjadi kesalahan saat membuat order');
+    }
+    }
+    }
+    }">
     @csrf
 
     <div>
@@ -365,7 +485,8 @@
         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Metode Pembayaran</label>
         <div class="grid grid-cols-2 gap-4">
             <label class="cursor-pointer">
-                <input type="radio" name="payment_method" value="cash" class="peer sr-only" checked>
+                <input type="radio" name="payment_method" value="cash" x-model="paymentMethod" class="peer sr-only"
+                    checked>
                 <div
                     class="p-4 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 hover:bg-white dark:hover:bg-gray-600 peer-checked:border-green-500 peer-checked:bg-green-50 dark:peer-checked:bg-green-900/30 peer-checked:text-green-700 dark:peer-checked:text-green-400 transition-all text-center">
                     <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -377,7 +498,7 @@
                 </div>
             </label>
             <label class="cursor-pointer">
-                <input type="radio" name="payment_method" value="qris" class="peer sr-only">
+                <input type="radio" name="payment_method" value="qris" x-model="paymentMethod" class="peer sr-only">
                 <div
                     class="p-4 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 hover:bg-white dark:hover:bg-gray-600 peer-checked:border-blue-500 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-900/30 peer-checked:text-blue-700 dark:peer-checked:text-blue-400 transition-all text-center">
                     <svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -397,10 +518,10 @@
             Batal
         </button>
         <button type="submit"
-            :disabled="!tipeOrder || (tipeOrder === 'kg' && (!selectedPaketKg || jumlahKg <= 0)) || (tipeOrder === 'pcs' && getTotalPcsItems() === 0)"
-            :class="(!tipeOrder || (tipeOrder === 'kg' && (!selectedPaketKg || jumlahKg <= 0)) || (tipeOrder === 'pcs' && getTotalPcsItems() === 0)) ? 'opacity-50 cursor-not-allowed' : ''"
-            class="px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-cyan-600 rounded-lg hover:from-blue-700 hover:to-cyan-700 shadow-md hover:shadow-lg transition">
-            Buat Order
+            :disabled="!tipeOrder || (tipeOrder === 'kg' && (!selectedPaketKg || jumlahKg <= 0)) || (tipeOrder === 'pcs' && getTotalPcsItems() === 0) || (pickup === 'dijemput' && !locationDetected)"
+            :class="(!tipeOrder || (tipeOrder === 'kg' && (!selectedPaketKg || jumlahKg <= 0)) || (tipeOrder === 'pcs' && getTotalPcsItems() === 0) || (pickup === 'dijemput' && !locationDetected)) ? 'opacity-50 cursor-not-allowed' : ''"
+            class="px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-cyan-600 rounded-lg hover:from-blue-700 hover:to-cyan-700 shadow-md hover:shadow-lg transition"
+            x-text="getSubmitButtonText()">
         </button>
     </div>
 </form>

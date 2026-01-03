@@ -15,7 +15,7 @@ class MidtransService
         Config::$is3ds = config('services.midtrans.is_3ds');
     }
 
-    public function createTransaction($orderCode, $amount, $customerDetails)
+    public function createTransaction($orderCode, $amount, $customerDetails, $itemDetails = null)
     {
         $params = [
             'transaction_details' => [
@@ -23,8 +23,12 @@ class MidtransService
                 'gross_amount' => $amount,
             ],
             'customer_details' => $customerDetails,
-            'enabled_payments' => ['qris'], // Hanya QRIS
+            'enabled_payments' => ['qris', 'gopay', 'shopeepay'], // QRIS & E-wallet
         ];
+
+        if ($itemDetails) {
+            $params['item_details'] = $itemDetails;
+        }
 
         return Snap::createTransaction($params);
     }

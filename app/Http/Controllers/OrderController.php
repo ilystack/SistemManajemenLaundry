@@ -37,6 +37,7 @@ class OrderController extends Controller
         $request->validate([
             'tipe_order' => 'required|in:kg,pcs',
             'pickup' => 'required|in:antar_sendiri,dijemput',
+            'payment_method' => 'required|in:cash,qris',
             'jarak_km' => 'required_if:pickup,dijemput|nullable|numeric|min:0',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
@@ -69,7 +70,7 @@ class OrderController extends Controller
                 'total_harga' => $subtotal + $biayaPickup,
                 'antrian' => $antrianTerakhir + 1,
                 'status' => 'menunggu',
-                'payment_method' => $request->payment_method ?? 'cash',
+                'payment_method' => $request->payment_method,
                 'latitude' => $request->latitude,
                 'longitude' => $request->longitude,
             ]);
@@ -122,7 +123,7 @@ class OrderController extends Controller
                 'total_harga' => $totalHargaItems + $biayaPickup,
                 'antrian' => $antrianTerakhir + 1,
                 'status' => 'menunggu',
-                'payment_method' => $request->payment_method ?? 'cash',
+                'payment_method' => $request->payment_method,
                 'latitude' => $request->latitude,
                 'longitude' => $request->longitude,
             ]);
@@ -144,21 +145,125 @@ class OrderController extends Controller
             );
         }
 
+        $firstOrder = $createdOrders[0] ?? null;
+
+        // Determine if payment is needed and calculate amount
+        $needsPayment = !($request->pickup === 'antar_sendiri' && $request->payment_method === 'cash');
+        $paymentAmount = 0;
+        $paymentType = '';
+        $snapToken = null;
+
+        if ($needsPayment && $firstOrder) {
+            $laundryTotal = $firstOrder->total_harga - $firstOrder->biaya_pickup;
+
+            if ($request->pickup === 'antar_sendiri' && $request->payment_method === 'qris') {
+                // Antar sendiri + QRIS = Full laundry only
+                $paymentAmount = $laundryTotal;
+                $paymentType = 'full';
+            } elseif ($request->pickup === 'dijemput' && $request->payment_method === 'cash') {
+                // Dijemput + cash = DP (jarak only)
+                $paymentAmount = $firstOrder->biaya_pickup;
+                $paymentType = 'dp';
+            } elseif ($request->pickup === 'dijemput' && $request->payment_method === 'qris') {
+                // Dijemput + QRIS = Full (laundry + jarak)
+                $paymentAmount = $firstOrder->total_harga;
+                $paymentType = 'full';
+            }
+
+            // Create Midtrans payment
+            try {
+                $orderCode = strtoupper($paymentType) . '-' . $firstOrder->id . '-' . time();
+
+                $customerDetails = [
+                    'first_name' => Auth::user()->name,
+                    'email' => Auth::user()->email,
+                    'phone' => Auth::user()->phone ?? '08123456789',
+                ];
+
+                $itemDetails = [
+                    [
+                        'id' => $firstOrder->id,
+                        'price' => $paymentAmount,
+                        'quantity' => 1,
+                        'name' => $paymentType === 'dp'
+                            ? "DP Biaya Pickup - Order #{$firstOrder->antrian}"
+                            : "Pembayaran Laundry - Order #{$firstOrder->antrian}"
+                    ]
+                ];
+
+                $midtransService = app(\App\Services\MidtransService::class);
+                $snapResponse = $midtransService->createTransaction(
+                    $orderCode,
+                    $paymentAmount,
+                    $customerDetails,
+                    $itemDetails
+                );
+
+                // Save payment record
+                \App\Models\Payment::updateOrCreate(
+                    ['order_id' => $firstOrder->id],
+                    [
+                        'order_code' => $orderCode,
+                        'payment_type' => 'qris',
+                        'amount' => $paymentAmount,
+                        'status' => 'pending',
+                        'snap_token' => $snapResponse->token,
+                        'payment_url' => $snapResponse->redirect_url,
+                    ]
+                );
+
+                $snapToken = $snapResponse->token;
+
+            } catch (\Exception $e) {
+                \Log::error('Midtrans payment creation failed: ' . $e->getMessage());
+
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Gagal membuat pembayaran: ' . $e->getMessage()
+                    ], 500);
+                }
+
+                return redirect()->back()->with('error', 'Gagal membuat pembayaran: ' . $e->getMessage());
+            }
+        }
+
+        // Return JSON for AJAX handling
+        if ($request->expectsJson() || $request->ajax()) {
+            if ($needsPayment && $snapToken) {
+                return response()->json([
+                    'success' => true,
+                    'needs_payment' => true,
+                    'snap_token' => $snapToken,
+                    'payment_amount' => $paymentAmount,
+                    'payment_type' => $paymentType,
+                    'order_id' => $firstOrder->id,
+                    'message' => 'Order berhasil dibuat. Silakan lakukan pembayaran.'
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'needs_payment' => false,
+                'redirect_url' => Auth::user()->role === 'customer'
+                    ? route('customer.dashboard')
+                    : route('order.index'),
+                'message' => 'Order berhasil dibuat!'
+            ]);
+        }
+
+        // Fallback for non-AJAX requests
+        if ($needsPayment && $firstOrder) {
+            return redirect()->route('payment.create', [
+                'order' => $firstOrder->id,
+                'amount' => $paymentAmount,
+                'type' => $paymentType
+            ]);
+        }
+
         if (Auth::user()->role === 'customer') {
-            $firstOrder = $createdOrders[0] ?? null;
-
-            if ($request->payment_method === 'qris' && $request->pickup === 'dijemput' && $firstOrder) {
-                return redirect()->route('payment.create', $firstOrder)
-                    ->with('success', 'Order berhasil! Silakan bayar DP penjemputan via QRIS.');
-            }
-
-            if ($request->payment_method === 'qris' && $request->pickup === 'antar_sendiri' && $firstOrder) {
-                return redirect()->route('customer.dashboard')
-                    ->with('success', 'Order berhasil dibuat! Anda bisa bayar via QRIS di halaman riwayat order.');
-            }
-
             return redirect()->route('customer.dashboard')
-                ->with('success', 'Order berhasil dibuat! Silakan bayar cash saat pengambilan/pengantaran.');
+                ->with('success', 'Order berhasil dibuat!');
         }
 
         return redirect()->route('order.index')->with('success', 'Order berhasil dibuat');

@@ -230,4 +230,8 @@
         {{-- Order Detail Modal --}}
         @include('components.order-detail-modal')
     </div>
+
+    {{-- Midtrans Snap Script --}}
+    <script src="https://app.sandbox.midtrans.com/snap/snap.js"
+        data-client-key="{{ config('services.midtrans.client_key') }}"></script>
 </x-sidetop>

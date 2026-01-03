@@ -17,29 +17,48 @@ class PaymentController extends Controller
         $this->midtransService = $midtransService;
     }
 
-    public function createPayment(Order $order)
+    public function createPayment(Request $request, Order $order)
     {
-        if ($order->pickup !== 'dijemput') {
-            return redirect()->back()->with('error', 'Order ini tidak memerlukan pembayaran DP');
-        }
-
+        // Check if already paid
         if ($order->payment && $order->payment->status === 'success') {
             return redirect()->back()->with('error', 'Order ini sudah dibayar');
         }
 
-        $orderCode = 'DP-' . $order->id . '-' . time();
+        // Get payment amount and type from request
+        $paymentAmount = $request->query('amount', $order->biaya_pickup);
+        $paymentType = $request->query('type', 'dp'); // dp or full
+
+        // Validate payment amount
+        if ($paymentAmount <= 0) {
+            return redirect()->back()->with('error', 'Jumlah pembayaran tidak valid');
+        }
+
+        $orderCode = strtoupper($paymentType) . '-' . $order->id . '-' . time();
 
         $customerDetails = [
             'first_name' => $order->user->name,
             'email' => $order->user->email,
-            'phone' => $order->user->whatsapp ?? '08123456789',
+            'phone' => $order->user->phone ?? '08123456789',
+        ];
+
+        // Item details for Midtrans
+        $itemDetails = [
+            [
+                'id' => $order->id,
+                'price' => $paymentAmount,
+                'quantity' => 1,
+                'name' => $paymentType === 'dp'
+                    ? "DP Biaya Pickup - Order #{$order->antrian}"
+                    : "Pembayaran Laundry - Order #{$order->antrian}"
+            ]
         ];
 
         try {
             $snapToken = $this->midtransService->createTransaction(
                 $orderCode,
-                $order->biaya_pickup, // DP = biaya pickup
-                $customerDetails
+                $paymentAmount,
+                $customerDetails,
+                $itemDetails
             );
 
             $payment = Payment::updateOrCreate(
@@ -47,14 +66,14 @@ class PaymentController extends Controller
                 [
                     'order_code' => $orderCode,
                     'payment_type' => 'qris',
-                    'amount' => $order->biaya_pickup,
+                    'amount' => $paymentAmount,
                     'status' => 'pending',
                     'snap_token' => $snapToken->token,
                     'payment_url' => $snapToken->redirect_url,
                 ]
             );
 
-            return view('pages.payment.show', compact('payment', 'order'));
+            return view('pages.payment.show', compact('payment', 'order', 'paymentType'));
 
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal membuat pembayaran: ' . $e->getMessage());

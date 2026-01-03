@@ -1,7 +1,9 @@
-<x-sidetop :role="Auth::user()->role" title="Pembayaran DP">
+<x-sidetop :role="Auth::user()->role" title="{{ $paymentType === 'dp' ? 'Pembayaran DP' : 'Pembayaran Laundry' }}">
     <div class="max-w-2xl mx-auto space-y-6">
         <div class="text-center">
-            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Pembayaran DP Penjemputan</h2>
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                {{ $paymentType === 'dp' ? 'Pembayaran DP Penjemputan' : 'Pembayaran Laundry' }}
+            </h2>
             <p class="text-gray-600 dark:text-gray-400">Scan QRIS untuk melanjutkan order Anda</p>
         </div>
 
@@ -25,12 +27,16 @@
                     <span class="text-gray-600 dark:text-gray-400">Paket</span>
                     <span class="font-semibold text-gray-900 dark:text-white">{{ $order->paket->nama }}</span>
                 </div>
-                <div class="flex justify-between">
-                    <span class="text-gray-600 dark:text-gray-400">Jarak Penjemputan</span>
-                    <span class="font-semibold text-gray-900 dark:text-white">{{ $order->jarak_km }} km</span>
-                </div>
+                @if($order->pickup === 'dijemput')
+                    <div class="flex justify-between">
+                        <span class="text-gray-600 dark:text-gray-400">Jarak Penjemputan</span>
+                        <span class="font-semibold text-gray-900 dark:text-white">{{ $order->jarak_km }} km</span>
+                    </div>
+                @endif
                 <div class="border-t border-gray-200 dark:border-gray-700 pt-3 flex justify-between">
-                    <span class="text-gray-900 dark:text-white font-semibold">Biaya DP</span>
+                    <span class="text-gray-900 dark:text-white font-semibold">
+                        {{ $paymentType === 'dp' ? 'Biaya DP' : 'Total Pembayaran' }}
+                    </span>
                     <span class="text-2xl font-bold text-blue-600 dark:text-blue-400">
                         Rp {{ number_format($payment->amount, 0, ',', '.') }}
                     </span>
@@ -114,8 +120,13 @@
                 <div class="text-sm text-blue-800 dark:text-blue-300">
                     <p class="font-semibold mb-1">Informasi Pembayaran:</p>
                     <ul class="list-disc list-inside space-y-1">
-                        <li>DP ini untuk biaya penjemputan laundry</li>
-                        <li>Pembayaran sisa akan dilakukan saat pengambilan</li>
+                        @if($paymentType === 'dp')
+                            <li>DP ini untuk biaya penjemputan laundry</li>
+                            <li>Pembayaran sisa akan dilakukan saat pengambilan</li>
+                        @else
+                            <li>Pembayaran ini sudah termasuk semua biaya</li>
+                            <li>Tidak ada pembayaran tambahan saat pengambilan</li>
+                        @endif
                         <li>Gunakan aplikasi e-wallet untuk scan QRIS</li>
                     </ul>
                 </div>
