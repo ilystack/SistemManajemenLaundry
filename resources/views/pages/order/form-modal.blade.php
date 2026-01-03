@@ -204,7 +204,8 @@
                     <p class="text-sm font-semibold text-green-900 dark:text-green-300">Lokasi Terdeteksi!</p>
                     <div class="mt-2 space-y-1">
                         <p class="text-sm text-green-800 dark:text-green-400"><span class="font-medium">Jarak:</span>
-                            <span class="font-bold" x-text="`${distance} km`"></span></p>
+                            <span class="font-bold" x-text="`${distance} km`"></span>
+                        </p>
                         <p class="text-sm text-green-800 dark:text-green-400"><span class="font-medium">Biaya
                                 Pickup:</span> <span class="font-bold"
                                 x-text="`Rp ${pickupCost.toLocaleString('id-ID')}`"></span></p>
@@ -284,6 +285,7 @@
             pickupCost: 0,
             gettingLocation: false,
             locationDetected: false,
+            isSubmitting: false,
 
             init() {
                 this.paketPcsRaw.forEach(p => {
@@ -417,6 +419,9 @@
             },
 
             async submitForm(event) {
+                if (this.isSubmitting) return;
+                this.isSubmitting = true;
+
                 const form = event.target;
                 const formData = new FormData(form);
 
@@ -444,6 +449,7 @@
                                 window.snap.pay(data.snap_token, {
                                     onSuccess: (result) => {
                                         this.showModal = false;
+                                        // isSubmitting stays true until page redirect
                                         if (typeof window.showToast === 'function') {
                                             window.showToast('Pembayaran berhasil!', 'success');
                                         }
@@ -451,6 +457,7 @@
                                     },
                                     onPending: (result) => {
                                         this.showModal = false;
+                                        // isSubmitting stays true until page redirect
                                         if (typeof window.showToast === 'function') {
                                             window.showToast('Menunggu pembayaran...', 'info');
                                         }
@@ -458,6 +465,7 @@
                                     },
                                     onError: (result) => {
                                         this.showModal = false;
+                                        this.isSubmitting = false; // Reset allowed only on error/close
                                         if (typeof window.showToast === 'function') {
                                             window.showToast('Pembayaran gagal. Silakan coba lagi.', 'error');
                                         } else {
@@ -466,6 +474,7 @@
                                     },
                                     onClose: () => {
                                         this.showModal = false;
+                                        this.isSubmitting = false; // Reset allowed on close so user can try again
                                         console.log('Payment popup closed');
                                         setTimeout(() => { window.location.href = DASHBOARD_URL; }, 500);
                                     }
@@ -476,25 +485,38 @@
                                     window.showToast('Gagal membuka pembayaran. Silakan coba lagi.', 'error');
                                 }
                                 this.showModal = false;
+                                this.isSubmitting = false;
                             }
                         } else {
                             if (typeof window.showToast === 'function') {
                                 window.showToast(data.message, 'success');
                             }
-                            setTimeout(() => { window.location.href = data.redirect_url; }, 1000);
+                            // Cash payment success
+                            setTimeout(() => { 
+                                this.showModal = false;
+                                window.location.href = DASHBOARD_URL; 
+                            }, 1000);
                         }
                     } else {
-                        throw new Error(data.message || 'Terjadi kesalahan');
+                        if (typeof window.showToast === 'function') {
+                            window.showToast(data.message || 'Terjadi kesalahan', 'error');
+                        }
+                        this.isSubmitting = false;
                     }
+
                 } catch (error) {
                     if (typeof window.hideLoading === 'function') window.hideLoading();
+                    console.error('Error:', error);
                     if (typeof window.showToast === 'function') {
-                        window.showToast(error.message || 'Terjadi kesalahan saat membuat order', 'error');
+                        window.showToast('Terjadi kesalahan sistem', 'error');
                     } else {
-                        alert(error.message || 'Terjadi kesalahan saat membuat order');
+                        alert('Terjadi kesalahan sistem');
                     }
+                    this.isSubmitting = false;
                 }
             }
+        };
+    }
         };
     }
 </script>

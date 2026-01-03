@@ -17,6 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
 
+        $middleware->validateCsrfTokens(except: [
+            '/payment/webhook',
+        ]);
+
         $middleware->web(append: [
             \App\Http\Middleware\CheckProfileComplete::class,
         ]);
